@@ -1,16 +1,14 @@
-from cart.models import Order, Voucher, Transaction
+from cart.models import Order, Transaction, Points
 from django.contrib.auth import get_user_model
 from rest_framework import viewsets, permissions
 from cart.serializers import (
     OrderSerializer,
-    VoucherSerializer,
     TransactionSerializer,
+    PointSerializer,
 )
-from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 import utils
-from users.serializers import UserSerializer
 
 User = get_user_model()
 status_mapping = {"Placed": 0, "Completed": 1, "Failed": 2}
@@ -114,6 +112,16 @@ class OrderViewSet(viewsets.ViewSet):
         user.save()
 
         # Make Entry in Points table
+        points_data = {
+            "user_id": user.id,
+            "points_reedemed": request_data.get("total_points_value"),
+            "message": f"Placed Order - #{request_data['order_id']}",
+            "balance": user.current_points,
+        }
+
+        point_serializer = PointSerializer(points_data)
+        if point_serializer.is_valid(raise_exception=True):
+            point_serializer.save()
 
         if incorrect_transaction_list:
             return Response(
@@ -160,7 +168,73 @@ class OrderViewSet(viewsets.ViewSet):
                 user.current_points = user.points_earned - user.points_redeemed
                 user.save()
 
-                # make entry in points table
+                # Make Entry in Points table
+                points_data = {
+                    "user_id": user.id,
+                    "points_earned": Order_data.total_points_value,
+                    "message": request_data.get("message"),
+                    "balance": user.current_points,
+                }
+
+                point_serializer = PointSerializer(points_data)
+                if point_serializer.is_valid(raise_exception=True):
+                    point_serializer.save()
 
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TransactionViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = TransactionSerializer
+
+    permission_map = {
+        "list": [permissions.IsAuthenticated, permissions.IsAdminUser],
+        "retrieve": [permissions.IsAuthenticated],
+    }
+
+    def get_permissions(self):
+        try:
+            return [
+                permission() for permission in self.permission_map[self.action]
+            ]
+        except KeyError:
+            return [permission() for permission in self.permission_classes]
+
+    def list(self, request):
+        queryset = Transaction.objects.all()
+        serializer = TransactionSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk, **kwargs):
+        queryset = Transaction.objects.filter(order_id=pk)
+        serializer = TransactionSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class PointViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = PointSerializer
+
+    permission_map = {
+        "list": [permissions.IsAuthenticated, permissions.IsAdminUser],
+        "retrieve": [permissions.IsAuthenticated],
+    }
+
+    def get_permissions(self):
+        try:
+            return [
+                permission() for permission in self.permission_map[self.action]
+            ]
+        except KeyError:
+            return [permission() for permission in self.permission_classes]
+
+    def list(self, request):
+        queryset = Points.objects.all()
+        serializer = PointSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk, **kwargs):
+        queryset = Points.objects.filter(user_id=pk)
+        serializer = PointSerializer(queryset, many=True)
+        return Response(serializer.data)

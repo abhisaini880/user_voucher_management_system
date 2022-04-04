@@ -61,3 +61,18 @@ class Transaction(models.Model):
 
     class Meta:
         db_table = "transactions"
+
+
+class Points(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    points_earned = models.IntegerField(null=False, default=0)
+    points_reedemed = models.IntegerField(null=False, default=0)
+    balance = models.IntegerField(null=False)
+    message = models.TextField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return f"Points: {self.user_id} - {self.balance}"
+
+    class Meta:
+        db_table = "points"
