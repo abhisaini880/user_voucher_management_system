@@ -8,7 +8,7 @@ class UserManager(BaseUserManager):
         name,
         mobile_number,
         region=None,
-        points_earned=None,
+        points_earned=0,
         password=None,
     ):
         """
@@ -44,14 +44,12 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, name, mobile_number, password):
+    def create_superuser(self, name, mobile_number, password, region):
         """
         Creates and saves a superuser with the given mobile_number and password.
         """
         user = self.create_user(
-            name,
-            mobile_number,
-            password=password,
+            name, mobile_number, password=password, region=region
         )
         user.staff = True
         user.admin = True

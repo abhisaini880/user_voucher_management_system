@@ -7,7 +7,6 @@ User = get_user_model()
 
 class RegisterForm(forms.ModelForm):
     name = forms.CharField(label="Username", max_length=100)
-    region = forms.CharField(max_length=100)
     password = forms.CharField(label="Password", widget=forms.PasswordInput)
     password_2 = forms.CharField(
         label="Confirm Password", widget=forms.PasswordInput
@@ -15,7 +14,7 @@ class RegisterForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ["mobile_number", "name", "region"]
+        fields = ["mobile_number", "name"]
 
     def clean_mobile_number(self):
         """
@@ -48,7 +47,6 @@ class UserAdminCreationForm(forms.ModelForm):
     """
 
     name = forms.CharField(max_length=100)
-    region = forms.CharField(max_length=100)
     password = forms.CharField(widget=forms.PasswordInput)
     password_2 = forms.CharField(
         label="Confirm Password", widget=forms.PasswordInput
@@ -56,7 +54,7 @@ class UserAdminCreationForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ["mobile_number", "name", "region"]
+        fields = ["mobile_number", "name"]
 
     def clean(self):
         """
