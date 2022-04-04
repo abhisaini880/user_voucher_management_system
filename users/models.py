@@ -3,7 +3,14 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, name, mobile_number, password=None):
+    def create_user(
+        self,
+        name,
+        mobile_number,
+        region=None,
+        points_earned=None,
+        password=None,
+    ):
         """
         Creates and saves a User with the given mobile number and password.
         """
@@ -13,7 +20,12 @@ class UserManager(BaseUserManager):
         if not mobile_number:
             raise ValueError("Users must have an mobile_number")
 
-        user = self.model(mobile_number=mobile_number, name=name)
+        user = self.model(
+            mobile_number=mobile_number,
+            name=name,
+            region=region,
+            points_earned=points_earned,
+        )
 
         user.set_password(password)
         user.save(using=self._db)
@@ -49,13 +61,20 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser):
     mobile_number = models.BigIntegerField(unique=True)
-    name = models.CharField(max_length=100, null=False)
+    name = models.CharField(max_length=100, null=True)
+    region = models.CharField(max_length=100, null=True)
+    points_earned = models.IntegerField(default=0)
+    points_redeemed = models.IntegerField(default=0)
+    current_points = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
     staff = models.BooleanField(default=False)  # a admin user; non super-user
     admin = models.BooleanField(default=False)  # a superuser
 
     USERNAME_FIELD = "mobile_number"
-    REQUIRED_FIELDS = ["name"]  # Email & Password are required by default.
+    REQUIRED_FIELDS = [
+        "name",
+        "region",
+    ]  # Email & Password are required by default.
     objects = UserManager()
 
     def __str__(self):
@@ -70,6 +89,11 @@ class User(AbstractBaseUser):
         "Does the user have permissions to view the app `app_label`?"
         # Simplest possible answer: Yes, always
         return True
+
+    @property
+    def points(self):
+        "return current points"
+        return self.current_points
 
     @property
     def is_staff(self):

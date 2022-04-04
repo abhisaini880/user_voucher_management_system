@@ -6,26 +6,64 @@ User = get_user_model()
 
 # User Serializer
 class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ("id", "name", "mobile_number")
+    def update(self, instance, validated_data):
+        instance.name = validated_data["name"]
+        instance.region = validated_data["region"]
+        instance.points_earned = validated_data["points_earned"]
+        instance.points_redeemed = validated_data["points_redeemed"]
+        instance.current_points = validated_data["current_points"]
+        instance.is_active = validated_data["is_active"]
+        instance.save()
 
-
-# Register Serializer
-class RegisterSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ("id", "name", "mobile_number", "password")
-        extra_kwargs = {"password": {"write_only": True}}
+        return instance
 
     def create(self, validated_data):
         user = User.objects.create_user(
-            validated_data["name"],
-            validated_data["mobile_number"],
-            validated_data["password"],
+            name=validated_data["name"],
+            mobile_number=validated_data["mobile_number"],
+            password=validated_data["password"],
+            region=validated_data["region"],
+            points_earned=validated_data["points_earned"],
         )
 
         return user
+
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "name",
+            "mobile_number",
+            "region",
+            "staff",
+            "is_active",
+            "current_points",
+            "points_earned",
+            "password",
+            "points_redeemed",
+        )
+        extra_kwargs = {
+            "password": {"write_only": True},
+        }
+
+
+# # Register Serializer
+# class RegisterSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = ("id", "name", "mobile_number")
+#         extra_kwargs = {"password": {"write_only": True}}
+
+#     def create(self, validated_data):
+#         user = User.objects.create_user(
+#             name=validated_data["name"],
+#             mobile_number=validated_data["mobile_number"],
+#             password=validated_data["password"],
+#             region=validated_data["region"],
+#             points_earned=validated_data["points_earned"],
+#         )
+
+#         return user
 
 
 # Login Serializer

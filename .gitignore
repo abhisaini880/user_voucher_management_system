@@ -130,3 +130,6 @@ dmypy.json
 
 # django
 migrations
+
+#npm
+node_modules
