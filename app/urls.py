@@ -20,4 +20,6 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("users.urls")),
     path("api/", include("cart.urls")),
+    path("api/", include("reedem_window.urls")),
+    path("api/", include("rewards.urls")),
 ]

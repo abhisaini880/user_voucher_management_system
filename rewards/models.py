@@ -7,7 +7,7 @@ class Reward(models.Model):
     brand_heading = models.CharField(max_length=255, null=True, blank=True)
     brand_value = models.IntegerField(null=False)
     points_value = models.IntegerField(null=False)
-    brand_image = models.FileField(upload_to="images/", null=False)
+    brand_image = models.URLField(null=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
