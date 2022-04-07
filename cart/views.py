@@ -119,7 +119,7 @@ class OrderViewSet(viewsets.ViewSet):
             "balance": user.current_points,
         }
 
-        point_serializer = PointSerializer(points_data)
+        point_serializer = PointSerializer(data=points_data)
         if point_serializer.is_valid(raise_exception=True):
             point_serializer.save()
 
@@ -176,7 +176,7 @@ class OrderViewSet(viewsets.ViewSet):
                     "balance": user.current_points,
                 }
 
-                point_serializer = PointSerializer(points_data)
+                point_serializer = PointSerializer(data=points_data)
                 if point_serializer.is_valid(raise_exception=True):
                     point_serializer.save()
 

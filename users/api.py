@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from knox.models import AuthToken
 
 from django.contrib.auth import get_user_model
+from cart.serializers import PointSerializer
 from rest_framework.decorators import action
 from rest_framework import status
 from .serializers import UserSerializer, LoginSerializer
@@ -94,7 +95,24 @@ class UserViewSet(viewsets.ViewSet):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            # Make entry in points table
+            user_data = serializer.data
+            user_id = user_data.get("id")
+            user = User.objects.get(id=user_id)
+            # Make Entry in Points table
+            user.current_points = user.points_earned
+            user.save()
+
+            points_data = {
+                "user_id": user_id,
+                "points_earned": user.points_earned,
+                "message": "Initial points added !",
+                "balance": user.current_points,
+            }
+
+            point_serializer = PointSerializer(data=points_data)
+            if point_serializer.is_valid(raise_exception=True):
+                point_serializer.save()
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -107,6 +125,7 @@ class UserViewSet(viewsets.ViewSet):
                 "User doesn't exist !",
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
         updated_data = {
             "name": request_data.get("name") or user_data.name,
             "region": request_data.get("region") or user_data.region,
@@ -127,10 +146,30 @@ class UserViewSet(viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        diff = updated_data["current_points"] - user_data.current_points
+
         serializer = UserSerializer(user_data, data=updated_data, partial=True)
         if serializer.is_valid():
             serializer.save()
             # Make entry in points table
+            points_data = {
+                "user_id": user_data.id,
+                "message": request_data.get("message"),
+                "points_earned": 0,
+                "points_reedemed": 0,
+            }
+
+            if diff > 0:
+                points_data["points_earned"] = diff
+            elif diff < 0:
+                points_data["points_reedemed"] = abs(diff)
+
+            points_data["balance"] = user_data.current_points
+
+            point_serializer = PointSerializer(data=points_data)
+            if point_serializer.is_valid(raise_exception=True):
+                point_serializer.save()
+
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -169,7 +208,25 @@ class UserViewSet(viewsets.ViewSet):
             serializer = UserSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
-                # Make entry in points table
+
+                user_data = serializer.data
+                user_id = user_data.get("id")
+                user = User.objects.get(id=user_id)
+                # Make Entry in Points table
+                user.current_points = user.points_earned
+                user.save()
+
+                points_data = {
+                    "user_id": user_id,
+                    "points_earned": user.points_earned,
+                    "message": "Initial points added !",
+                    "balance": user.current_points,
+                }
+
+                point_serializer = PointSerializer(data=points_data)
+                if point_serializer.is_valid(raise_exception=True):
+                    point_serializer.save()
+
             else:
                 incorrect_user_list.append([index, serializer.errors])
 
@@ -231,6 +288,8 @@ class UserViewSet(viewsets.ViewSet):
                 updated_data["points_earned"] - updated_data["points_redeemed"]
             )
 
+            diff = updated_data["current_points"] - user_data.current_points
+
             if updated_data["current_points"] < 0:
                 incorrect_user_list.append(
                     {
@@ -243,7 +302,25 @@ class UserViewSet(viewsets.ViewSet):
             )
             if serializer.is_valid():
                 serializer.save()
+
                 # Make entry in points table
+                points_data = {
+                    "user_id": user_data.id,
+                    "message": data.get("message"),
+                }
+
+                if diff > 0:
+                    points_data["points_earned"] = diff
+                    points_data["points_reedemed"] = 0
+                elif diff < 0:
+                    points_data["points_earned"] = 0
+                    points_data["points_reedemed"] = abs(diff)
+
+                points_data["balance"] = user_data.current_points
+
+                point_serializer = PointSerializer(data=points_data)
+                if point_serializer.is_valid(raise_exception=True):
+                    point_serializer.save()
             else:
                 incorrect_user_list.append({index: serializer.errors})
 
