@@ -16,7 +16,7 @@ User = get_user_model()
 
 
 class PingAPI(generics.GenericAPIView):
-    def get(self):
+    def get(self, request):
         return Response({"success": True}, status=status.HTTP_200_OK)
 
 
