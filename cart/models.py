@@ -6,21 +6,6 @@ User = settings.AUTH_USER_MODEL
 STATUS = [(0, "Placed"), (1, "Completed"), (2, "Failed")]
 
 
-class Voucher(models.Model):
-    voucher_id = models.AutoField(primary_key=True)
-    voucher_name = models.CharField(max_length=255, null=True, blank=True)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    brand = models.CharField(max_length=100, null=False)
-    brand_value = models.IntegerField(null=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self) -> str:
-        return f"Voucher: {self.voucher_id}"
-
-    class Meta:
-        db_table = "vouchers"
-
-
 class Order(models.Model):
     order_id = models.CharField(max_length=120, blank=True)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)

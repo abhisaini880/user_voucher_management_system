@@ -10,6 +10,7 @@ class UserManager(BaseUserManager):
         region=None,
         points_earned=0,
         password=None,
+        admin=False,
     ):
         """
         Creates and saves a User with the given mobile number and password.
@@ -26,8 +27,10 @@ class UserManager(BaseUserManager):
             region=region,
             points_earned=points_earned,
         )
-
-        user.set_password(password)
+        if admin:
+            user.set_password(password)
+        else:
+            user.set_unusable_password()
         user.save(using=self._db)
         return user
 
@@ -36,9 +39,7 @@ class UserManager(BaseUserManager):
         Creates and saves a staff user with the given mobile_number and password.
         """
         user = self.create_user(
-            name,
-            mobile_number,
-            password=password,
+            name, mobile_number, password=password, admin=True
         )
         user.staff = True
         user.save(using=self._db)
@@ -49,7 +50,7 @@ class UserManager(BaseUserManager):
         Creates and saves a superuser with the given mobile_number and password.
         """
         user = self.create_user(
-            name, mobile_number, password=password, region=region
+            name, mobile_number, password=password, region=region, admin=True
         )
         user.staff = True
         user.admin = True
@@ -65,6 +66,8 @@ class User(AbstractBaseUser):
     points_redeemed = models.IntegerField(default=0)
     current_points = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
+    otp = models.CharField(max_length=4, null=True)
+    login_retry = models.IntegerField(default=0)
     staff = models.BooleanField(default=False)  # a admin user; non super-user
     admin = models.BooleanField(default=False)  # a superuser
 
@@ -102,3 +105,6 @@ class User(AbstractBaseUser):
     def is_admin(self):
         "Is the user a admin member?"
         return self.admin
+
+    class Meta:
+        db_table = "users"

@@ -1,12 +1,18 @@
 import random
 import string
 import base64
+import math
 
 
-def random_string_generator(
-    size=10, chars=string.ascii_lowercase + string.digits
-):
-    return "".join(random.choice(chars) for _ in range(size))
+def random_string_generator(size=10):
+    return "".join(
+        [
+            random.choice(
+                string.ascii_uppercase + string.ascii_lowercase + string.digits
+            )
+            for _ in range(size)
+        ]
+    )
 
 
 def unique_order_id_generator(instance):
@@ -24,3 +30,35 @@ def convert_image_to_binary(image_path):
         image_data = base64.b64encode(image_file.read()).decode("utf-8")
 
     return image_data
+
+
+def generate_otp():
+    digits = "0123456789"
+    OTP = ""
+    for _ in range(4):
+        OTP += digits[math.floor(random.random() * 10)]
+
+    return OTP
+
+
+def send_otp(mobile, otp):
+    conn = http.client.HTTPSConnection("api.msg91.com")
+    authkey = settings.AUTH_KEY
+    headers = {"content-type": "application/json"}
+    url = (
+        "http://control.msg91.com/api/sendotp.php?otp="
+        + otp
+        + "&message="
+        + "Your otp is "
+        + otp
+        + "&mobile="
+        + mobile
+        + "&authkey="
+        + authkey
+        + "&country=91"
+    )
+    conn.request("GET", url, headers=headers)
+    res = conn.getresponse()
+    data = res.read()
+    print(data)
+    return None

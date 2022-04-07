@@ -100,48 +100,60 @@ class RewardViewSet(viewsets.ViewSet):
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # @action(methods=["post"], detail=False)
-    # def bulk_create(self, request):
-    #     file = request.FILES["users"]
+    def delete(self, request):
+        request_data = request.data
+        reward_ids = request_data.get("reward_ids")
 
-    #     content = file.read()  # these are bytes
-    #     file_content = ContentFile(content)
+        if Reward.objects.filter(reward_id__in=reward_ids).exists():
+            count = Reward.objects.filter(reward_id__in=reward_ids).delete()
+            return Response(
+                {"message": f"{count[0]} Rewards were deleted successfully!"},
+                status=status.HTTP_204_NO_CONTENT,
+            )
 
-    #     user_df = pd.read_csv(file_content)
+    @action(methods=["post"], detail=False)
+    def bulk_create(self, request):
+        file = request.FILES["users"]
 
-    #     required_headers = [
-    #         "mobile_number",
-    #         "password",
-    #         "name",
-    #         "region",
-    #         "points_earned",
-    #     ]
+        content = file.read()  # these are bytes
+        file_content = ContentFile(content)
 
-    #     if user_df.empty:
-    #         return Response(
-    #             "Received Empty File ! Please try again.",
-    #             status=status.HTTP_400_BAD_REQUEST,
-    #         )
+        rewards_df = pd.read_csv(file_content)
 
-    #     if not all(header in user_df.columns for header in required_headers):
-    #         return Response(
-    #             "File Missing Required Fields !",
-    #             status=status.HTTP_400_BAD_REQUEST,
-    #         )
+        required_headers = [
+            "brand",
+            "brand_heading",
+            "brand_value",
+            "points_value",
+            "brand_image",
+        ]
 
-    #     user_data_list = user_df.to_dict("records")
-    #     incorrect_user_list = []
-    #     for index, data in enumerate(user_data_list):
-    #         serializer = UserSerializer(data=data)
-    #         if serializer.is_valid():
-    #             serializer.save()
-    #             # Make entry in points table
-    #         else:
-    #             incorrect_user_list.append([index, serializer.errors])
+        if rewards_df.empty:
+            return Response(
+                "Received Empty File ! Please try again.",
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-    #     if incorrect_user_list:
-    #         return Response(incorrect_user_list)
-    #     return Response("Successfully registered users !")
+        if not all(
+            header in rewards_df.columns for header in required_headers
+        ):
+            return Response(
+                "File Missing Required Fields !",
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        reward_data_list = rewards_df.to_dict("records")
+        incorrect_reward_list = []
+        for index, data in enumerate(reward_data_list):
+            serializer = RewardSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+            else:
+                incorrect_reward_list.append([index, serializer.errors])
+
+        if incorrect_reward_list:
+            return Response(incorrect_reward_list)
+        return Response("Successfully added rewards !")
 
     # @action(methods=["put"], detail=False)
     # def bulk_update(self, request):
@@ -150,37 +162,40 @@ class RewardViewSet(viewsets.ViewSet):
     #     content = file.read()  # these are bytes
     #     file_content = ContentFile(content)
 
-    #     user_df = pd.read_csv(file_content)
+    #     rewards_df = pd.read_csv(file_content)
 
     #     required_headers = [
-    #         "mobile_number",
-    #         "name",
-    #         "region",
-    #         "points_earned",
+    #         "brand",
+    #         "brand_heading",
+    #         "brand_value",
+    #         "points_value",
+    #         "brand_image",
     #     ]
 
-    #     if user_df.empty:
+    #     if rewards_df.empty:
     #         return Response(
     #             "Received Empty File ! Please try again.",
     #             status=status.HTTP_400_BAD_REQUEST,
     #         )
 
-    #     if not all(header in user_df.columns for header in required_headers):
+    #     if not all(
+    #         header in rewards_df.columns for header in required_headers
+    #     ):
     #         return Response(
     #             "File Missing Required Fields !",
     #             status=status.HTTP_400_BAD_REQUEST,
     #         )
 
-    #     user_data_list = user_df.to_dict("records")
-    #     incorrect_user_list = []
-    #     for index, data in enumerate(user_data_list):
+    #     reward_data_list = rewards_df.to_dict("records")
+    #     incorrect_reward_list = []
+    #     for index, data in enumerate(reward_data_list):
 
     #         try:
-    #             user_data = User.objects.get(
+    #             reward_data = Reward.objects.get(
     #                 mobile_number=data["mobile_number"]
     #             )
     #         except:
-    #             incorrect_user_list.append([index, "User Doesn't exists"])
+    #             incorrect_reward_list.append([index, "Reward Doesn't exists"])
     #             continue
 
     #         updated_data = {

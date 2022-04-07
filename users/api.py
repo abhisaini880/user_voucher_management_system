@@ -9,15 +9,38 @@ from django.contrib.auth import get_user_model
 from rest_framework.decorators import action
 from rest_framework import status
 from .serializers import UserSerializer, LoginSerializer
+import utils
 
 
 User = get_user_model()
 
 
+class PingAPI(generics.GenericAPIView):
+    def get(self):
+        return Response({"success": True}, status=status.HTTP_200_OK)
+
+
 class LoginAPI(generics.GenericAPIView):
     serializer_class = LoginSerializer
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
+        mobile_number = request.data.get("mobile_number")
+        if not User.objects.filter(mobile_number=mobile_number).exists():
+            return Response(
+                "User Doesn't exists", status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user = User.objects.get(mobile_number=mobile_number)
+        otp = utils.generate_otp()
+        user.otp = otp
+        user.login_retry = 0
+        user.save()
+        # utils.send_otp(mobile_number, otp)
+        return Response(
+            "OTP Sent to mobile number !", status=status.HTTP_200_OK
+        )
+
+    def put(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data
@@ -68,10 +91,10 @@ class UserViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def create(self, request):
-        print(request.data)
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            # Make entry in points table
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -107,6 +130,7 @@ class UserViewSet(viewsets.ViewSet):
         serializer = UserSerializer(user_data, data=updated_data, partial=True)
         if serializer.is_valid():
             serializer.save()
+            # Make entry in points table
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -145,6 +169,7 @@ class UserViewSet(viewsets.ViewSet):
             serializer = UserSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
+                # Make entry in points table
             else:
                 incorrect_user_list.append([index, serializer.errors])
 
@@ -218,6 +243,7 @@ class UserViewSet(viewsets.ViewSet):
             )
             if serializer.is_valid():
                 serializer.save()
+                # Make entry in points table
             else:
                 incorrect_user_list.append({index: serializer.errors})
 

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from cart.models import Order, Voucher, Transaction, Points
+from cart.models import Order, Transaction, Points
 
 status_mapping = {0: "Placed", 1: "Completed", 2: "Failed"}
 
@@ -19,12 +19,6 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = "__all__"
-
-
-class VoucherSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Voucher
         fields = "__all__"
 
 
