@@ -3,6 +3,7 @@ from django.core.files.base import ContentFile
 
 from rest_framework import generics, permissions, viewsets
 from rest_framework.response import Response
+from django.http import JsonResponse
 from knox.models import AuthToken
 
 from django.contrib.auth import get_user_model
@@ -28,7 +29,7 @@ class LoginAPI(generics.GenericAPIView):
         mobile_number = request.data.get("mobile_number")
         if not User.objects.filter(mobile_number=mobile_number).exists():
             return Response(
-                "User Doesn't exists", status=status.HTTP_400_BAD_REQUEST
+                {"success": False, "messgae": "User Doesn't Exists !"}
             )
 
         user = User.objects.get(mobile_number=mobile_number)
@@ -37,8 +38,8 @@ class LoginAPI(generics.GenericAPIView):
         user.login_retry = 0
         user.save()
         # utils.send_otp(mobile_number, otp)
-        return Response(
-            "OTP Sent to mobile number !", status=status.HTTP_200_OK
+        return JsonResponse(
+            {"success": True, "messgae": "OTP Sent to mobile number !"},
         )
 
     def put(self, request, *args, **kwargs):
@@ -184,7 +185,6 @@ class UserViewSet(viewsets.ViewSet):
 
         required_headers = [
             "mobile_number",
-            "password",
             "name",
             "region",
             "points_earned",
