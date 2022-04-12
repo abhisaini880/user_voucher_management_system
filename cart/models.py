@@ -3,7 +3,7 @@ from django.conf import settings
 
 User = settings.AUTH_USER_MODEL
 
-STATUS = [(0, "Placed"), (1, "Completed"), (2, "Failed")]
+STATUS = [(0, "Placed"), (1, "Delivered"), (2, "Reedemed")]
 
 
 class Order(models.Model):

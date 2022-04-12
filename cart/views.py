@@ -1,3 +1,6 @@
+import pandas as pd
+from django.core.files.base import ContentFile
+
 from cart.models import Order, Transaction, Points
 from django.contrib.auth import get_user_model
 from rest_framework import viewsets, permissions
@@ -7,11 +10,12 @@ from cart.serializers import (
     PointSerializer,
 )
 from rest_framework.response import Response
+from rest_framework.decorators import action
 from rest_framework import status
 import utils
 
 User = get_user_model()
-status_mapping = {"Placed": 0, "Completed": 1, "Failed": 2}
+status_mapping = {0: "Placed", 1: "Delivered", 2: "Reedemed"}
 
 
 class OrderViewSet(viewsets.ViewSet):
@@ -146,7 +150,6 @@ class OrderViewSet(viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        previous_order_status = Order_data.status
         updated_data = {
             "status": status_mapping[request_data.get("status", "Placed")],
             "message": request_data["message"],
@@ -157,31 +160,62 @@ class OrderViewSet(viewsets.ViewSet):
         if serializer.is_valid():
             serializer.save()
 
-            # If order status is failed then return points to user
-            user = Order_data.user_id
-            if (
-                request_data.get("status")
-                and updated_data["status"] == 2
-                and previous_order_status != 2
-            ):
-                user.points_earned += Order_data.total_points_value
-                user.current_points = user.points_earned - user.points_redeemed
-                user.save()
-
-                # Make Entry in Points table
-                points_data = {
-                    "user_id": user.id,
-                    "points_earned": Order_data.total_points_value,
-                    "message": request_data.get("message"),
-                    "balance": user.current_points,
-                }
-
-                point_serializer = PointSerializer(data=points_data)
-                if point_serializer.is_valid(raise_exception=True):
-                    point_serializer.save()
-
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=["put"], detail=False)
+    def bulk_update(self, request):
+        file = request.FILES["orders"]
+
+        content = file.read()  # these are bytes
+        file_content = ContentFile(content)
+
+        order_df = pd.read_csv(file_content)
+
+        required_headers = ["order_id", "status"]
+
+        if order_df.empty:
+            return Response(
+                "Received Empty File ! Please try again.",
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not all(header in order_df.columns for header in required_headers):
+            return Response(
+                "File Missing Required Fields !",
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        order_data_list = order_df.to_dict("records")
+        incorrect_order_list = []
+        for index, data in enumerate(order_data_list):
+
+            try:
+                order_data = Order.objects.get(order_id=data["order_id"])
+            except:
+                incorrect_order_list.append(
+                    [
+                        index + 2,
+                        {"order_id": ["order Doesn't exists"]},
+                    ]
+                )
+                continue
+
+            updated_data = {"status": data.get("status")}
+
+            serializer = OrderSerializer(
+                order_data, data=updated_data, partial=True
+            )
+            if serializer.is_valid():
+                serializer.save()
+            else:
+                incorrect_order_list.append({index + 2: serializer.errors})
+
+        if incorrect_order_list:
+            return Response({"success": False, "data": incorrect_order_list})
+        return Response(
+            {"success": True, "message": "Successfully updated orders !"}
+        )
 
 
 class TransactionViewSet(viewsets.ViewSet):
