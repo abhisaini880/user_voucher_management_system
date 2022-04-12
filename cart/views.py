@@ -44,7 +44,7 @@ class OrderViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def retrieve(self, request, pk):
-        queryset = Order.objects.filter(order_id=pk)
+        queryset = Order.objects.filter(user_id=pk)
         serializer = OrderSerializer(queryset, many=True)
         return Response(serializer.data)
 
