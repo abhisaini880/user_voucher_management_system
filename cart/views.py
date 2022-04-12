@@ -15,7 +15,7 @@ from rest_framework import status
 import utils
 
 User = get_user_model()
-status_mapping = {0: "Placed", 1: "Delivered", 2: "Reedemed"}
+status_mapping = {"Placed": 0, "Delivered": 1, "Reedemed": 3}
 
 
 class OrderViewSet(viewsets.ViewSet):
