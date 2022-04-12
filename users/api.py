@@ -37,7 +37,10 @@ class LoginAPI(generics.GenericAPIView):
         user.otp = otp
         user.login_retry = 0
         user.save()
-        # utils.send_otp(mobile_number, otp)
+        message, template_id = utils.generate_message(key="otp", value=otp)
+        utils.send_sms(
+            mobile=mobile_number, message=message, template_id=template_id
+        )
         return JsonResponse(
             {"success": True, "messgae": "OTP Sent to mobile number !"},
         )
@@ -93,6 +96,10 @@ class UserViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def create(self, request):
+        mobile_number = request.data.get("mobile_number")
+        if not mobile_number or len(str(mobile_number)) != 10:
+            return Response("Invalid mobile number")
+
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -205,6 +212,16 @@ class UserViewSet(viewsets.ViewSet):
         user_data_list = user_df.to_dict("records")
         incorrect_user_list = []
         for index, data in enumerate(user_data_list):
+
+            if (
+                not data.get("mobile_number")
+                or len(str(data.get("mobile_number"))) != 10
+            ):
+                incorrect_user_list.append(
+                    [index, {"mobile_number": ["Invalid mobile number !"]}]
+                )
+                continue
+
             serializer = UserSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
@@ -231,8 +248,10 @@ class UserViewSet(viewsets.ViewSet):
                 incorrect_user_list.append([index, serializer.errors])
 
         if incorrect_user_list:
-            return Response(incorrect_user_list)
-        return Response("Successfully registered users !")
+            return Response({"success": False, "data": incorrect_user_list})
+        return Response(
+            {"success": True, "message": "Successfully registered users !"}
+        )
 
     @action(methods=["put"], detail=False)
     def bulk_update(self, request):
@@ -325,8 +344,10 @@ class UserViewSet(viewsets.ViewSet):
                 incorrect_user_list.append({index: serializer.errors})
 
         if incorrect_user_list:
-            return Response(incorrect_user_list)
-        return Response("Successfully updated users !")
+            return Response({"success": False, "data": incorrect_user_list})
+        return Response(
+            {"success": True, "message": "Successfully updated users !"}
+        )
 
     def get_permissions(self):
         try:

@@ -2,6 +2,10 @@ import random
 import string
 import base64
 import math
+import requests
+
+api_key = "J2uHCbY3zqnsfo0X"
+api_pass = "5jaQBxbotJ"
 
 
 def random_string_generator(size=10):
@@ -41,24 +45,32 @@ def generate_otp():
     return OTP
 
 
-def send_otp(mobile, otp):
-    conn = http.client.HTTPSConnection("api.msg91.com")
-    authkey = settings.AUTH_KEY
-    headers = {"content-type": "application/json"}
+def send_sms(mobile, message, template_id):
+
+    if not (mobile and message and template_id):
+        return None
     url = (
-        "http://control.msg91.com/api/sendotp.php?otp="
-        + otp
+        "https://smscounter.com/api/url_api.php?api_key="
+        + api_key
+        + "&pass="
+        + api_pass
+        + "&senderid=RBUDAN&template_id="
+        + template_id
         + "&message="
-        + "Your otp is "
-        + otp
-        + "&mobile="
-        + mobile
-        + "&authkey="
-        + authkey
-        + "&country=91"
+        + message
+        + "&dest_mobileno="
+        + str(mobile)
+        + "&mtype=TXT"
     )
-    conn.request("GET", url, headers=headers)
-    res = conn.getresponse()
-    data = res.read()
-    print(data)
+    print(url)
+    res = requests.get(url, verify=False)
+    print(res.content)
     return None
+
+
+def generate_message(key, value):
+    template_id, message = None, None
+    if key == "otp":
+        template_id = "1507164976279565550"
+        message = f"Your+OTP+from+Reckitt+Udaan+is+({value})"
+    return message, template_id
