@@ -218,7 +218,7 @@ class UserViewSet(viewsets.ViewSet):
                 or len(str(data.get("mobile_number"))) != 10
             ):
                 incorrect_user_list.append(
-                    [index, {"mobile_number": ["Invalid mobile number !"]}]
+                    [index + 2, {"mobile_number": ["Invalid mobile number !"]}]
                 )
                 continue
 
@@ -245,7 +245,7 @@ class UserViewSet(viewsets.ViewSet):
                     point_serializer.save()
 
             else:
-                incorrect_user_list.append([index, serializer.errors])
+                incorrect_user_list.append([index + 2, serializer.errors])
 
         if incorrect_user_list:
             return Response({"success": False, "data": incorrect_user_list})
@@ -290,7 +290,16 @@ class UserViewSet(viewsets.ViewSet):
                     mobile_number=data["mobile_number"]
                 )
             except:
-                incorrect_user_list.append([index, "User Doesn't exists"])
+                incorrect_user_list.append(
+                    [
+                        index + 2,
+                        {
+                            "mobile_number": [
+                                "User with mobile number Doesn't exists"
+                            ]
+                        },
+                    ]
+                )
                 continue
 
             updated_data = {
@@ -312,7 +321,12 @@ class UserViewSet(viewsets.ViewSet):
             if updated_data["current_points"] < 0:
                 incorrect_user_list.append(
                     {
-                        index: "Can't update the points value below its redeemed value."
+                        index
+                        + 2: {
+                            "points_earned": [
+                                "Can't update the points value below its redeemed value."
+                            ]
+                        }
                     }
                 )
                 continue
@@ -341,7 +355,7 @@ class UserViewSet(viewsets.ViewSet):
                 if point_serializer.is_valid(raise_exception=True):
                     point_serializer.save()
             else:
-                incorrect_user_list.append({index: serializer.errors})
+                incorrect_user_list.append({index + 2: serializer.errors})
 
         if incorrect_user_list:
             return Response({"success": False, "data": incorrect_user_list})
