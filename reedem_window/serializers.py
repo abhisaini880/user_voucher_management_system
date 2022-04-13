@@ -1,14 +1,19 @@
 from rest_framework import serializers
 from reedem_window.models import RedeemWindow
+from datetime import datetime
 
 
 class WindowSerializer(serializers.ModelSerializer):
-    def update(self, instance, validated_data):
-        instance.close_at = validated_data["close_at"]
-        instance.is_active = validated_data["is_active"]
-        instance.save()
+    def to_representation(self, data):
+        data = super(WindowSerializer, self).to_representation(data)
+        data["open_at"] = datetime.fromisoformat(data["open_at"]).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+        data["close_at"] = datetime.fromisoformat(data["close_at"]).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
 
-        return instance
+        return data
 
     class Meta:
         model = RedeemWindow

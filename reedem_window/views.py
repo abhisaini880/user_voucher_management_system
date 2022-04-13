@@ -36,32 +36,34 @@ class WindowViewSet(viewsets.ViewSet):
 
     @action(methods=["get"], detail=False)
     def active_window(self, request):
-        window_status = RedeemWindow.objects.filter(is_active=True).exists()
-        window = RedeemWindow.objects.filter(is_active=True)
+        window = (
+            RedeemWindow.objects.filter(is_active=True)
+            .filter(open_at__lt=datetime.now())
+            .filter(close_at__gt=datetime.now())
+        )
+        window_status = window.exists()
         serializer = WindowSerializer(window, many=True)
         return Response(
             {"Window_active": window_status, "data": serializer.data}
         )
 
     def create(self, request):
-
-        start_date = request.data("start_date")
-        end_date = request.data("end_date")
+        start_date = request.data.get("start_date")
+        end_date = request.data.get("end_date")
 
         if RedeemWindow.objects.filter(is_active=True).exists():
             window = RedeemWindow.objects.get(is_active=True)
             window.is_active = False
             window.save()
-            return Response(
-                {"message": "Window already active"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
 
-        data = {
-            "open_at": datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S"),
-            "close_at": datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S"),
-            "is_active": True,
-        }
+        try:
+            data = {
+                "open_at": datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S"),
+                "close_at": datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S"),
+                "is_active": True,
+            }
+        except:
+            return Response("Date format should be `YYYY-MM-DD HH:MM:SS`")
 
         serializer = WindowSerializer(data=data)
         if serializer.is_valid(raise_exception=True):
@@ -69,12 +71,17 @@ class WindowViewSet(viewsets.ViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request):
-        end_date = request.data("end_date")
+        end_date = request.data.get("end_date")
         if RedeemWindow.objects.filter(is_active=True).exists():
             window = RedeemWindow.objects.filter(is_active=True).first()
-            data = {
-                "close_at": datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S"),
-            }
+            try:
+                data = {
+                    "close_at": datetime.strptime(
+                        end_date, "%Y-%m-%d %H:%M:%S"
+                    ),
+                }
+            except:
+                return Response("Date format should be `YYYY-MM-DD HH:MM:SS`")
             serializer = WindowSerializer(window, data=data, partial=True)
             if serializer.is_valid(raise_exception=True):
                 serializer.save()
