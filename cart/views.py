@@ -132,6 +132,13 @@ class OrderViewSet(viewsets.ViewSet):
                 incorrect_transaction_list, status=status.HTTP_400_BAD_REQUEST
             )
 
+        message, template_id = utils.generate_message(
+            "order", request_data["order_id"]
+        )
+        utils.send_sms(
+            mobile=user.mobile_number, message=message, template_id=template_id
+        )
+
         return Response(order_serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, pk):
