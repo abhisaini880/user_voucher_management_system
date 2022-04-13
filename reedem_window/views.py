@@ -37,21 +37,29 @@ class WindowViewSet(viewsets.ViewSet):
     @action(methods=["get"], detail=False)
     def active_window(self, request):
         window_status = RedeemWindow.objects.filter(is_active=True).exists()
+        window = RedeemWindow.objects.filter(is_active=True)
+        serializer = WindowSerializer(window, many=True)
         return Response(
-            {
-                "Window_active": window_status,
-            }
+            {"Window_active": window_status, "data": serializer.data}
         )
 
     def create(self, request):
+
+        start_date = request.data("start_date")
+        end_date = request.data("end_date")
+
         if RedeemWindow.objects.filter(is_active=True).exists():
+            window = RedeemWindow.objects.get(is_active=True)
+            window.is_active = False
+            window.save()
             return Response(
                 {"message": "Window already active"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         data = {
-            "open_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "open_at": datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S"),
+            "close_at": datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S"),
             "is_active": True,
         }
 
@@ -61,11 +69,11 @@ class WindowViewSet(viewsets.ViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request):
+        end_date = request.data("end_date")
         if RedeemWindow.objects.filter(is_active=True).exists():
             window = RedeemWindow.objects.filter(is_active=True).first()
             data = {
-                "close_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "is_active": False,
+                "close_at": datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S"),
             }
             serializer = WindowSerializer(window, data=data, partial=True)
             if serializer.is_valid(raise_exception=True):

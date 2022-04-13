@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from cart.models import Order, Transaction, Points
 
-status_mapping = {0: "Placed", 1: "Delivered", 2: "Reedemed"}
+status_mapping = {0: "Order Placed", 1: "Delivered", 2: "Reedemed"}
 
 
 class OrderSerializer(serializers.ModelSerializer):

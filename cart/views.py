@@ -15,7 +15,7 @@ from rest_framework import status
 import utils
 
 User = get_user_model()
-status_mapping = {"Placed": 0, "Delivered": 1, "Reedemed": 3}
+status_mapping = {"Order Placed": 0, "Delivered": 1, "Reedemed": 3}
 
 
 class OrderViewSet(viewsets.ViewSet):
@@ -65,7 +65,7 @@ class OrderViewSet(viewsets.ViewSet):
             )
 
         request_data["status"] = status_mapping[
-            request_data.get("status", "Placed")
+            request_data.get("status", "Order Placed")
         ]
         request_data["user_id"] = user.id
 
@@ -119,7 +119,7 @@ class OrderViewSet(viewsets.ViewSet):
         points_data = {
             "user_id": user.id,
             "points_reedemed": request_data.get("total_points_value"),
-            "message": f"Placed Order - #{request_data['order_id']}",
+            "message": f"Points Debited for Order ID #{request_data['order_id']}",
             "balance": user.current_points,
         }
 
@@ -151,7 +151,9 @@ class OrderViewSet(viewsets.ViewSet):
             )
 
         updated_data = {
-            "status": status_mapping[request_data.get("status", "Placed")],
+            "status": status_mapping[
+                request_data.get("status", "Order Placed")
+            ],
             "message": request_data["message"],
         }
         serializer = OrderSerializer(
