@@ -29,10 +29,16 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class TransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Transaction
+        fields = "__all__"
+
+
+class TransactionReportSerializer(serializers.ModelSerializer):
     user_id = UserSerializer(read_only=True)
 
     def to_representation(self, data):
-        data = super(TransactionSerializer, self).to_representation(data)
+        data = super(TransactionReportSerializer, self).to_representation(data)
         data["created_at"] = datetime.fromisoformat(
             data["created_at"]
         ).strftime("%Y-%m-%d %H:%M:%S")

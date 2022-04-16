@@ -7,6 +7,7 @@ from rest_framework import viewsets, permissions
 from cart.serializers import (
     OrderSerializer,
     TransactionSerializer,
+    TransactionReportSerializer,
     PointSerializer,
 )
 from rest_framework.response import Response
@@ -94,6 +95,8 @@ class OrderViewSet(viewsets.ViewSet):
                 "points_value": data.get("points_value"),
                 "quantity": data.get("quantity"),
             }
+
+            print(transaction_data)
 
             transaction_data["points_reedemed"] = (
                 transaction_data["points_value"] * transaction_data["quantity"]
@@ -229,7 +232,7 @@ class OrderViewSet(viewsets.ViewSet):
 
 class TransactionViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = TransactionSerializer
+    serializer_class = TransactionReportSerializer
 
     permission_map = {
         "list": [permissions.IsAuthenticated, permissions.IsAdminUser],
@@ -246,12 +249,12 @@ class TransactionViewSet(viewsets.ViewSet):
 
     def list(self, request):
         queryset = Transaction.objects.all()
-        serializer = TransactionSerializer(queryset, many=True)
+        serializer = TransactionReportSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, pk, **kwargs):
         queryset = Transaction.objects.filter(order_id=pk)
-        serializer = TransactionSerializer(queryset, many=True)
+        serializer = TransactionReportSerializer(queryset, many=True)
         return Response(serializer.data)
 
 
