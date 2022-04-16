@@ -55,6 +55,8 @@ class PointSerializer(serializers.ModelSerializer):
             data["created_at"]
         ).strftime("%Y-%m-%d %H:%M:%S")
 
+        return data
+
     class Meta:
         model = Points
         fields = "__all__"
