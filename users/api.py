@@ -236,7 +236,7 @@ class UserViewSet(viewsets.ViewSet):
                 points_data = {
                     "user_id": user_id,
                     "points_earned": user.points_earned,
-                    "message": "Initial points added !",
+                    "message": "Points Credited to Your Account",
                     "balance": user.current_points,
                 }
 
