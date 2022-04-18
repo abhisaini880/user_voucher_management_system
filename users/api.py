@@ -188,7 +188,16 @@ class UserViewSet(viewsets.ViewSet):
         content = file.read()  # these are bytes
         file_content = ContentFile(content)
 
-        user_df = pd.read_csv(file_content)
+        try:
+            user_df = pd.read_csv(file_content)
+        except Exception as err:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Invalid CSV File.",
+                    "debug_message": str(err),
+                }
+            )
 
         required_headers = [
             "mobile_number",
@@ -260,7 +269,16 @@ class UserViewSet(viewsets.ViewSet):
         content = file.read()  # these are bytes
         file_content = ContentFile(content)
 
-        user_df = pd.read_csv(file_content)
+        try:
+            user_df = pd.read_csv(file_content)
+        except Exception as err:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Invalid CSV File.",
+                    "debug_message": str(err),
+                }
+            )
 
         required_headers = [
             "mobile_number",

@@ -182,7 +182,16 @@ class OrderViewSet(viewsets.ViewSet):
         content = file.read()  # these are bytes
         file_content = ContentFile(content)
 
-        order_df = pd.read_csv(file_content)
+        try:
+            order_df = pd.read_csv(file_content)
+        except Exception as err:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Invalid CSV File.",
+                    "debug_message": str(err),
+                }
+            )
 
         required_headers = ["order_id", "status"]
 
