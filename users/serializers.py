@@ -1,3 +1,4 @@
+from xml.dom import ValidationErr
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
@@ -22,6 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(
             name=validated_data["name"],
             ws_name=validated_data["ws_name"],
+            unique_id=validated_data["unique_id"],
             mobile_number=validated_data["mobile_number"],
             region=validated_data["region"],
             points_earned=validated_data["points_earned"],
