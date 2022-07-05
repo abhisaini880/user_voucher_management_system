@@ -7,6 +7,7 @@ class UserManager(BaseUserManager):
         self,
         name,
         mobile_number,
+        unique_id=None,
         ws_name=None,
         region=None,
         points_earned=0,
@@ -25,6 +26,7 @@ class UserManager(BaseUserManager):
         user = self.model(
             mobile_number=mobile_number,
             ws_name=ws_name,
+            unique_id=unique_id,
             name=name,
             region=region,
             points_earned=points_earned,
