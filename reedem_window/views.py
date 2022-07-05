@@ -5,6 +5,7 @@ from reedem_window.serializers import WindowSerializer
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status
+from users.api import IsAdminView, IsEditor
 
 
 class WindowViewSet(viewsets.ViewSet):
@@ -12,13 +13,10 @@ class WindowViewSet(viewsets.ViewSet):
     serializer_class = WindowSerializer
 
     permission_map = {
-        "list": [permissions.IsAuthenticated, permissions.IsAdminUser],
+        "list": [permissions.IsAuthenticated, IsAdminView, IsEditor],
         "active_window": [permissions.IsAuthenticated],
-        "create": [permissions.IsAuthenticated, permissions.IsAdminUser],
-        "update": [
-            permissions.IsAuthenticated,
-            permissions.IsAdminUser,
-        ],
+        "create": [permissions.IsAuthenticated, IsEditor],
+        "update": [permissions.IsAuthenticated, IsEditor],
     }
 
     def get_permissions(self):

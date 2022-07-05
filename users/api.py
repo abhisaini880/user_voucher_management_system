@@ -2,6 +2,7 @@ import pandas as pd
 from django.core.files.base import ContentFile
 
 from rest_framework import generics, permissions, viewsets
+from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 from django.http import JsonResponse
 from knox.models import AuthToken
@@ -20,6 +21,16 @@ User = get_user_model()
 class PingAPI(generics.GenericAPIView):
     def get(self, request):
         return Response({"success": True}, status=status.HTTP_200_OK)
+
+
+class IsEditor(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.staff_editor
+
+
+class IsAdminView(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.staff
 
 
 class LoginAPI(generics.GenericAPIView):
@@ -65,23 +76,23 @@ class UserViewSet(viewsets.ViewSet):
     serializer_class = UserSerializer
 
     permission_map = {
-        "list": [permissions.IsAuthenticated, permissions.IsAdminUser],
+        "list": [permissions.IsAuthenticated, IsEditor, IsAdminView],
         "retrieve": [permissions.IsAuthenticated],
         "create": [
             permissions.IsAuthenticated,
-            permissions.IsAdminUser,
+            IsEditor,
         ],
         "update": [
             permissions.IsAuthenticated,
-            permissions.IsAdminUser,
+            IsEditor,
         ],
         "bulk_create": [
             permissions.IsAuthenticated,
-            permissions.IsAdminUser,
+            IsEditor,
         ],
         "bulk_update": [
             permissions.IsAuthenticated,
-            permissions.IsAdminUser,
+            IsEditor,
         ],
     }
 
@@ -136,12 +147,13 @@ class UserViewSet(viewsets.ViewSet):
 
         updated_data = {
             "name": request_data.get("name") or user_data.name,
+            "ws_name": request_data.get("ws_name") or user_data.ws_name,
             "region": request_data.get("region") or user_data.region,
-            "points_earned": request_data.get("points_earned")
-            or user_data.points_earned,
-            "points_redeemed": request_data.get("points_redeemed")
-            or user_data.points_redeemed,
             "is_active": request_data.get("is_active") or user_data.is_active,
+            "points_earned": user_data.points_earned
+            + request_data.get("add_points", 0),
+            "points_redeemed": user_data.points_redeemed
+            + request_data.get("delete_points", 0),
         }
 
         updated_data["current_points"] = (
@@ -150,7 +162,7 @@ class UserViewSet(viewsets.ViewSet):
 
         if updated_data["current_points"] < 0:
             return Response(
-                "Can't update the points value below its redeemed value.",
+                "Can't update the points value below 0.",
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -181,6 +193,18 @@ class UserViewSet(viewsets.ViewSet):
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def delete(self, request):
+        request_data = request.data
+        user_ids = request_data.get("user_ids")
+
+        if User.objects.filter(id__in=user_ids).exists():
+            count = User.objects.filter(id__in=user_ids).delete()
+            print(count)
+            return Response(
+                {"message": f"{count[0]} User were deleted successfully!"},
+                status=status.HTTP_204_NO_CONTENT,
+            )
+
     @action(methods=["post"], detail=False)
     def bulk_create(self, request):
         file = request.FILES["users"]
@@ -201,6 +225,7 @@ class UserViewSet(viewsets.ViewSet):
 
         required_headers = [
             "mobile_number",
+            "unique_id",
             "name",
             "region",
             "points_earned",
@@ -284,7 +309,6 @@ class UserViewSet(viewsets.ViewSet):
             "mobile_number",
             "name",
             "region",
-            "points_earned",
         ]
 
         if user_df.empty:
@@ -323,16 +347,22 @@ class UserViewSet(viewsets.ViewSet):
             updated_data = {
                 "name": data.get("name") or user_data.name,
                 "region": data.get("region") or user_data.region,
-                "points_earned": data.get("points_earned")
-                or user_data.points_earned,
-                "points_redeemed": data.get("points_redeemed")
-                or user_data.points_redeemed,
                 "is_active": data.get("is_active") or user_data.is_active,
+                "points_earned": user_data.points_earned
+                + data.get("add_points", 0),
+                "points_redeemed": user_data.points_redeemed
+                + data.get("delete_points", 0),
             }
 
             updated_data["current_points"] = (
                 updated_data["points_earned"] - updated_data["points_redeemed"]
             )
+
+            if updated_data["current_points"] < 0:
+                return Response(
+                    "Can't update the points value below 0.",
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
             diff = updated_data["current_points"] - user_data.current_points
 
@@ -342,7 +372,7 @@ class UserViewSet(viewsets.ViewSet):
                         index
                         + 2: {
                             "points_earned": [
-                                "Can't update the points value below its redeemed value."
+                                "Can't update the points value below 0."
                             ]
                         }
                     }

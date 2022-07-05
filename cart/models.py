@@ -39,6 +39,7 @@ class Transaction(models.Model):
     points_value = models.IntegerField(null=False)
     quantity = models.IntegerField(null=False, default=1)
     points_reedemed = models.IntegerField(null=False)
+    voucher_code = models.CharField(max_length=200, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:

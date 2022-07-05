@@ -8,6 +8,7 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         instance.name = validated_data["name"]
+        instance.ws_name = validated_data["ws_name"]
         instance.region = validated_data["region"]
         instance.points_earned = validated_data["points_earned"]
         instance.points_redeemed = validated_data["points_redeemed"]
@@ -20,6 +21,7 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create_user(
             name=validated_data["name"],
+            ws_name=validated_data["ws_name"],
             mobile_number=validated_data["mobile_number"],
             region=validated_data["region"],
             points_earned=validated_data["points_earned"],
@@ -32,6 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "name",
+            "ws_name",
             "mobile_number",
             "region",
             "staff",
