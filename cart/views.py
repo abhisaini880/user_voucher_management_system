@@ -14,6 +14,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status
 import utils
+from users.api import IsAdminView, IsEditor
 
 User = get_user_model()
 status_mapping = {"Order Placed": 0, "Delivered": 1, "Reedemed": 3}
@@ -24,15 +25,12 @@ class OrderViewSet(viewsets.ViewSet):
     serializer_class = OrderSerializer
 
     permission_map = {
-        "list": [permissions.IsAuthenticated, permissions.IsAdminUser],
+        "list": [permissions.IsAuthenticated, IsAdminView, IsEditor],
         "retrieve": [permissions.IsAuthenticated],
         "create": [
             permissions.IsAuthenticated,
         ],
-        "update": [
-            permissions.IsAuthenticated,
-            permissions.IsAdminUser,
-        ],
+        "update": [permissions.IsAuthenticated, IsEditor],
     }
 
     def get_permissions(self):
@@ -56,6 +54,14 @@ class OrderViewSet(viewsets.ViewSet):
     def create(self, request):
         request_data = request.data
         user = request.user
+
+        # check if user is inactive return with error
+        if not user.is_active:
+            return Response(
+                "Can't execute order, user is inactive !",
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         # create order id
         request_data["order_id"] = utils.unique_order_id_generator(Order)
 
@@ -95,8 +101,6 @@ class OrderViewSet(viewsets.ViewSet):
                 "points_value": data.get("points_value"),
                 "quantity": data.get("quantity"),
             }
-
-            print(transaction_data)
 
             transaction_data["points_reedemed"] = (
                 transaction_data["points_value"] * transaction_data["quantity"]
@@ -146,6 +150,14 @@ class OrderViewSet(viewsets.ViewSet):
 
     def update(self, request, pk):
         request_data = request.data
+        user = request.user
+        # check if user is inactive return with error
+        if not user.is_active:
+            return Response(
+                "Can't execute order, user is inactive !",
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         try:
             Order_data = Order.objects.get(order_id=pk)
         except:
@@ -178,6 +190,13 @@ class OrderViewSet(viewsets.ViewSet):
     @action(methods=["put"], detail=False)
     def bulk_update(self, request):
         file = request.FILES["orders"]
+        user = request.user
+        # check if user is inactive return with error
+        if not user.is_active:
+            return Response(
+                "Can't execute order, user is inactive !",
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         content = file.read()  # these are bytes
         file_content = ContentFile(content)
@@ -244,8 +263,9 @@ class TransactionViewSet(viewsets.ViewSet):
     serializer_class = TransactionReportSerializer
 
     permission_map = {
-        "list": [permissions.IsAuthenticated, permissions.IsAdminUser],
+        "list": [IsAdminView],
         "retrieve": [permissions.IsAuthenticated],
+        "bulk_update": [IsAdminView],
     }
 
     def get_permissions(self):
@@ -266,13 +286,84 @@ class TransactionViewSet(viewsets.ViewSet):
         serializer = TransactionReportSerializer(queryset, many=True)
         return Response(serializer.data)
 
+    @action(methods=["put"], detail=False)
+    def bulk_update(self, request):
+        file = request.FILES["voucher"]
+
+        content = file.read()  # these are bytes
+        file_content = ContentFile(content)
+
+        try:
+            voucher_df = pd.read_csv(file_content)
+        except Exception as err:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Invalid CSV File.",
+                    "debug_message": str(err),
+                }
+            )
+
+        required_headers = ["transaction_id", "voucher_code"]
+
+        if voucher_df.empty:
+            return Response(
+                "Received Empty File ! Please try again.",
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not all(
+            header in voucher_df.columns for header in required_headers
+        ):
+            return Response(
+                "File Missing Required Fields !",
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        voucher_data_list = voucher_df.to_dict("records")
+        incorrect_transaction_list = []
+        for index, data in enumerate(voucher_data_list):
+
+            try:
+                transaction_data = Transaction.objects.get(
+                    transaction_id=data["transaction_id"]
+                )
+            except:
+                incorrect_transaction_list.append(
+                    [
+                        index + 2,
+                        {"transaction_id": ["transaction Doesn't exists"]},
+                    ]
+                )
+                continue
+
+            updated_data = {"voucher_code": data.get("voucher_code")}
+
+            serializer = TransactionSerializer(
+                transaction_data, data=updated_data, partial=True
+            )
+            if serializer.is_valid():
+                serializer.save()
+            else:
+                incorrect_transaction_list.append(
+                    {index + 2: serializer.errors}
+                )
+
+        if incorrect_transaction_list:
+            return Response(
+                {"success": False, "data": incorrect_transaction_list}
+            )
+        return Response(
+            {"success": True, "message": "Successfully updated vouchers !"}
+        )
+
 
 class PointViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = PointSerializer
 
     permission_map = {
-        "list": [permissions.IsAuthenticated, permissions.IsAdminUser],
+        "list": [permissions.IsAuthenticated, IsAdminView, IsEditor],
         "retrieve": [permissions.IsAuthenticated],
     }
 

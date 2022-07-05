@@ -10,7 +10,7 @@ from rest_framework import status
 
 from rewards.models import Reward
 from .serializers import RewardSerializer
-import utils
+from users.api import IsAdminView, IsEditor
 
 
 User = get_user_model()
@@ -22,26 +22,11 @@ class RewardViewSet(viewsets.ViewSet):
 
     permission_map = {
         "list": [permissions.IsAuthenticated],
-        "create": [
-            permissions.IsAuthenticated,
-            permissions.IsAdminUser,
-        ],
-        "update": [
-            permissions.IsAuthenticated,
-            permissions.IsAdminUser,
-        ],
-        "bulk_create": [
-            permissions.IsAuthenticated,
-            permissions.IsAdminUser,
-        ],
-        "bulk_update": [
-            permissions.IsAuthenticated,
-            permissions.IsAdminUser,
-        ],
-        "delete": [
-            permissions.IsAuthenticated,
-            permissions.IsAdminUser,
-        ],
+        "create": [permissions.IsAuthenticated, IsEditor],
+        "update": [permissions.IsAuthenticated, IsEditor],
+        "bulk_create": [permissions.IsAuthenticated, IsEditor],
+        "bulk_update": [permissions.IsAuthenticated, IsEditor],
+        "delete": [permissions.IsAuthenticated, IsEditor],
     }
 
     def list(self, request):

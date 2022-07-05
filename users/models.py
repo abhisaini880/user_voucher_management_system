@@ -7,6 +7,7 @@ class UserManager(BaseUserManager):
         self,
         name,
         mobile_number,
+        ws_name=None,
         region=None,
         points_earned=0,
         password=None,
@@ -23,6 +24,7 @@ class UserManager(BaseUserManager):
 
         user = self.model(
             mobile_number=mobile_number,
+            ws_name=ws_name,
             name=name,
             region=region,
             points_earned=points_earned,
@@ -60,6 +62,8 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser):
     mobile_number = models.BigIntegerField(unique=True)
+    unique_id = models.CharField(max_length=100, unique=True, null=True)
+    ws_name = models.CharField(max_length=100, null=True)
     name = models.CharField(max_length=100, null=True)
     region = models.CharField(max_length=100, null=True)
     points_earned = models.IntegerField(default=0)
@@ -69,6 +73,9 @@ class User(AbstractBaseUser):
     otp = models.CharField(max_length=4, null=True)
     login_retry = models.IntegerField(default=0)
     staff = models.BooleanField(default=False)  # a admin user; non super-user
+    staff_editor = models.BooleanField(
+        default=False
+    )  # a admin user; non super-user with write access
     admin = models.BooleanField(default=False)  # a superuser
 
     USERNAME_FIELD = "mobile_number"

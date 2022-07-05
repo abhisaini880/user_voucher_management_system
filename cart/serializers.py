@@ -29,6 +29,12 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class TransactionSerializer(serializers.ModelSerializer):
+    def update(self, instance, validated_data):
+        instance.voucher_code = validated_data["voucher_code"]
+        instance.save()
+
+        return instance
+
     class Meta:
         model = Transaction
         fields = "__all__"

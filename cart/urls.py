@@ -9,6 +9,7 @@ transaction_details = TransactionViewSet.as_view({"get": "retrieve"})
 point_list = PointViewSet.as_view({"get": "list"})
 point_details = PointViewSet.as_view({"get": "retrieve"})
 order_bulk = OrderViewSet.as_view({"put": "bulk_update"})
+transaction_bulk = TransactionViewSet.as_view({"put": "bulk_update"})
 
 urlpatterns = [
     path("orders", order_list, name="order-list"),
@@ -26,4 +27,5 @@ urlpatterns = [
         name="point-details",
     ),
     path("order/bulk", order_bulk, name="order-update"),
+    path("transaction/bulk", transaction_bulk, name="transaction-update"),
 ]
