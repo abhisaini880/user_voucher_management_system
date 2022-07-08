@@ -25,7 +25,7 @@ class OrderViewSet(viewsets.ViewSet):
     serializer_class = OrderSerializer
 
     permission_map = {
-        "list": [permissions.IsAuthenticated, IsAdminView, IsEditor],
+        "list": [permissions.IsAuthenticated, IsAdminView],
         "retrieve": [permissions.IsAuthenticated],
         "create": [
             permissions.IsAuthenticated,
@@ -363,7 +363,7 @@ class PointViewSet(viewsets.ViewSet):
     serializer_class = PointSerializer
 
     permission_map = {
-        "list": [permissions.IsAuthenticated, IsAdminView, IsEditor],
+        "list": [permissions.IsAuthenticated, IsAdminView],
         "retrieve": [permissions.IsAuthenticated],
     }
 
