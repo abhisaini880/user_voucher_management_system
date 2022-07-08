@@ -13,7 +13,7 @@ class WindowViewSet(viewsets.ViewSet):
     serializer_class = WindowSerializer
 
     permission_map = {
-        "list": [permissions.IsAuthenticated, IsAdminView, IsEditor],
+        "list": [permissions.IsAuthenticated, IsAdminView],
         "active_window": [permissions.IsAuthenticated],
         "create": [permissions.IsAuthenticated, IsEditor],
         "update": [permissions.IsAuthenticated, IsEditor],

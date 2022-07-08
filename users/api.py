@@ -76,7 +76,7 @@ class UserViewSet(viewsets.ViewSet):
     serializer_class = UserSerializer
 
     permission_map = {
-        "list": [permissions.IsAuthenticated, IsEditor, IsAdminView],
+        "list": [permissions.IsAuthenticated, IsAdminView],
         "retrieve": [permissions.IsAuthenticated],
         "create": [
             permissions.IsAuthenticated,
