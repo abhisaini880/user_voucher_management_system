@@ -38,6 +38,7 @@ class UserSerializer(serializers.ModelSerializer):
             "name",
             "ws_name",
             "mobile_number",
+            "unique_id",
             "region",
             "staff",
             "is_active",
