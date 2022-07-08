@@ -149,7 +149,7 @@ class UserViewSet(viewsets.ViewSet):
             "name": request_data.get("name") or user_data.name,
             "ws_name": request_data.get("ws_name") or user_data.ws_name,
             "region": request_data.get("region") or user_data.region,
-            "is_active": request_data.get("is_active") or user_data.is_active,
+            "is_active": request_data.get("is_active", user_data.is_active),
             "points_earned": user_data.points_earned
             + request_data.get("add_points", 0),
             "points_redeemed": user_data.points_redeemed
@@ -346,8 +346,9 @@ class UserViewSet(viewsets.ViewSet):
 
             updated_data = {
                 "name": data.get("name") or user_data.name,
+                "ws_name": data.get("ws_name") or user_data.ws_name,
                 "region": data.get("region") or user_data.region,
-                "is_active": data.get("is_active") or user_data.is_active,
+                "is_active": data.get("is_active", user_data.is_active),
                 "points_earned": user_data.points_earned
                 + data.get("add_points", 0),
                 "points_redeemed": user_data.points_redeemed
