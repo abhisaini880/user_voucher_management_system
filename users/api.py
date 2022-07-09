@@ -199,10 +199,9 @@ class UserViewSet(viewsets.ViewSet):
 
         if User.objects.filter(id__in=user_ids).exists():
             count = User.objects.filter(id__in=user_ids).delete()
-            print(count)
             return Response(
                 {"message": f"{count[0]} User were deleted successfully!"},
-                status=status.HTTP_204_NO_CONTENT,
+                status=status.HTTP_200_OK,
             )
 
     @action(methods=["post"], detail=False)
