@@ -68,7 +68,7 @@ class LoginSerializer(serializers.Serializer):
 
         if user.login_retry > 3:
             raise serializers.ValidationError("OTP Expired !")
-        elif user.otp == data["otp"] and user.is_active:
+        elif user.otp == data["otp"]:
             user.login_retry = 5
             user.save()
             return user
