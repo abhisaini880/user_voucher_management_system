@@ -14,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
         instance.points_earned = validated_data["points_earned"]
         instance.points_redeemed = validated_data["points_redeemed"]
         instance.current_points = validated_data["current_points"]
-        instance.is_active = validated_data["is_active"]
+        instance.read_only = validated_data["read_only"]
         instance.save()
 
         return instance

@@ -56,7 +56,7 @@ class OrderViewSet(viewsets.ViewSet):
         user = request.user
 
         # check if user is inactive return with error
-        if not user.is_active:
+        if user.read_only:
             return Response(
                 "Can't execute order, user is inactive !",
                 status=status.HTTP_400_BAD_REQUEST,
@@ -152,7 +152,7 @@ class OrderViewSet(viewsets.ViewSet):
         request_data = request.data
         user = request.user
         # check if user is inactive return with error
-        if not user.is_active:
+        if user.read_only:
             return Response(
                 "Can't execute order, user is inactive !",
                 status=status.HTTP_400_BAD_REQUEST,
@@ -192,7 +192,7 @@ class OrderViewSet(viewsets.ViewSet):
         file = request.FILES["orders"]
         user = request.user
         # check if user is inactive return with error
-        if not user.is_active:
+        if user.read_only:
             return Response(
                 "Can't execute order, user is inactive !",
                 status=status.HTTP_400_BAD_REQUEST,
