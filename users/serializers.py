@@ -47,6 +47,7 @@ class UserSerializer(serializers.ModelSerializer):
             "otp",
             "points_redeemed",
             "staff_editor",
+            "read_only",
         )
         extra_kwargs = {
             "otp": {"write_only": True},
