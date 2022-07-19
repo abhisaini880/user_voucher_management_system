@@ -172,23 +172,26 @@ class UserViewSet(viewsets.ViewSet):
         if serializer.is_valid():
             serializer.save()
             # Make entry in points table
-            points_data = {
-                "user_id": user_data.id,
-                "message": request_data.get("message"),
-                "points_earned": 0,
-                "points_reedemed": 0,
-            }
+            if request_data.get("add_points") or request_data.get(
+                "delete_points"
+            ):
+                points_data = {
+                    "user_id": user_data.id,
+                    "message": request_data.get("message"),
+                    "points_earned": 0,
+                    "points_reedemed": 0,
+                }
 
-            if diff > 0:
-                points_data["points_earned"] = diff
-            elif diff < 0:
-                points_data["points_reedemed"] = abs(diff)
+                if diff > 0:
+                    points_data["points_earned"] = diff
+                elif diff < 0:
+                    points_data["points_reedemed"] = abs(diff)
 
-            points_data["balance"] = user_data.current_points
+                points_data["balance"] = user_data.current_points
 
-            point_serializer = PointSerializer(data=points_data)
-            if point_serializer.is_valid(raise_exception=True):
-                point_serializer.save()
+                point_serializer = PointSerializer(data=points_data)
+                if point_serializer.is_valid(raise_exception=True):
+                    point_serializer.save()
 
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -385,23 +388,24 @@ class UserViewSet(viewsets.ViewSet):
                 serializer.save()
 
                 # Make entry in points table
-                points_data = {
-                    "user_id": user_data.id,
-                    "message": data.get("message"),
-                }
+                if data.get("add_points") or data.get("delete_points"):
+                    points_data = {
+                        "user_id": user_data.id,
+                        "message": data.get("message"),
+                    }
 
-                if diff > 0:
-                    points_data["points_earned"] = diff
-                    points_data["points_reedemed"] = 0
-                elif diff < 0:
-                    points_data["points_earned"] = 0
-                    points_data["points_reedemed"] = abs(diff)
+                    if diff > 0:
+                        points_data["points_earned"] = diff
+                        points_data["points_reedemed"] = 0
+                    elif diff < 0:
+                        points_data["points_earned"] = 0
+                        points_data["points_reedemed"] = abs(diff)
 
-                points_data["balance"] = user_data.current_points
+                    points_data["balance"] = user_data.current_points
 
-                point_serializer = PointSerializer(data=points_data)
-                if point_serializer.is_valid(raise_exception=True):
-                    point_serializer.save()
+                    point_serializer = PointSerializer(data=points_data)
+                    if point_serializer.is_valid(raise_exception=True):
+                        point_serializer.save()
             else:
                 incorrect_user_list.append({index + 2: serializer.errors})
 
