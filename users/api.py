@@ -77,7 +77,7 @@ class UserViewSet(viewsets.ViewSet):
 
     permission_map = {
         "list": [permissions.IsAuthenticated, IsAdminView],
-        # "retrieve": [permissions.IsAuthenticated],
+        "retrieve": [permissions.IsAuthenticated],
         "create": [
             permissions.IsAuthenticated,
             IsEditor,
