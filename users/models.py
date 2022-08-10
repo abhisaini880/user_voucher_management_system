@@ -75,6 +75,7 @@ class User(AbstractBaseUser):
     otp = models.CharField(max_length=4, null=True)
     login_retry = models.IntegerField(default=0)
     read_only = models.BooleanField(default=True)
+    voucher_write = models.BooleanField(default=False)
     staff = models.BooleanField(default=False)  # a admin user; non super-user
     staff_editor = models.BooleanField(
         default=False

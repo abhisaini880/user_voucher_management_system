@@ -15,6 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
         instance.points_redeemed = validated_data["points_redeemed"]
         instance.current_points = validated_data["current_points"]
         instance.read_only = validated_data["read_only"]
+        instance.voucher_write = validated_data["voucher_write"]
         instance.save()
 
         return instance
@@ -48,6 +49,7 @@ class UserSerializer(serializers.ModelSerializer):
             "points_redeemed",
             "staff_editor",
             "read_only",
+            "voucher_write",
         )
         extra_kwargs = {
             "otp": {"write_only": True},
