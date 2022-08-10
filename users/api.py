@@ -150,6 +150,9 @@ class UserViewSet(viewsets.ViewSet):
             "ws_name": request_data.get("ws_name") or user_data.ws_name,
             "region": request_data.get("region") or user_data.region,
             "read_only": request_data.get("read_only", user_data.read_only),
+            "voucher_write": request_data.get(
+                "voucher_write", user_data.voucher_write
+            ),
             "points_earned": user_data.points_earned
             + request_data.get("add_points", 0),
             "points_redeemed": user_data.points_redeemed
@@ -351,6 +354,9 @@ class UserViewSet(viewsets.ViewSet):
                 "ws_name": data.get("ws_name") or user_data.ws_name,
                 "region": data.get("region") or user_data.region,
                 "read_only": data.get("read_only", user_data.read_only),
+                "voucher_write": data.get(
+                    "voucher_write", user_data.voucher_write
+                ),
                 "points_earned": user_data.points_earned
                 + data.get("add_points", 0),
                 "points_redeemed": user_data.points_redeemed
