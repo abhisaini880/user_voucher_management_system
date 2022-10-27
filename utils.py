@@ -75,6 +75,6 @@ def generate_message(key, value):
         message = f"Your+OTP+from+Reckitt+Udaan+is+({value})"
 
     if key == "order":
-        template_id = "1507164977266452298"
-        message = f"Congratulations!+Your+order+ID+({value})+has+been+confirmed.+It+will+be+delivered+in+15+days.+For+any+support%2C+reach+out+to+us+at+helpdesk%40reckittudaan.in+or+call+us+at+0120-4602918+Team+Rbudan"
+        template_id = "1507166625346783704"
+        message = f"Hi%2C+Your+order+ID%3A+{value}+has+been+confirmed.+It+will+be+delivered+in+15+days.+For+any+support%2C+reach+out+to+us+at+helpdesk%40reckittudaan.in+or+0120-4602918.+Team+RBUDAAN"
     return message, template_id
