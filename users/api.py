@@ -149,6 +149,7 @@ class UserViewSet(viewsets.ViewSet):
             "name": request_data.get("name") or user_data.name,
             "ws_name": request_data.get("ws_name") or user_data.ws_name,
             "region": request_data.get("region") or user_data.region,
+            "upi_id": request_data.get("upi_id") or user_data.upi_id,
             "read_only": request_data.get("read_only", user_data.read_only),
             "voucher_write": request_data.get(
                 "voucher_write", user_data.voucher_write
@@ -353,6 +354,7 @@ class UserViewSet(viewsets.ViewSet):
                 "name": data.get("name") or user_data.name,
                 "ws_name": data.get("ws_name") or user_data.ws_name,
                 "region": data.get("region") or user_data.region,
+                "upi_id": data.get("upi_id") or user_data.upi_id,
                 "read_only": data.get("read_only", user_data.read_only),
                 "voucher_write": data.get(
                     "voucher_write", user_data.voucher_write

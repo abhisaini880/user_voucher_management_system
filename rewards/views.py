@@ -30,7 +30,12 @@ class RewardViewSet(viewsets.ViewSet):
     }
 
     def list(self, request):
-        queryset = Reward.objects.all()
+        request_data = request.GET
+
+        if request_data.get("status", "").lower() == "true":
+            queryset = Reward.objects.filter(status=True)
+        else:
+            queryset = Reward.objects.all()
         serializer = RewardSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -75,6 +80,7 @@ class RewardViewSet(viewsets.ViewSet):
             or reward_data.points_value,
             "brand_image": request_data.get("brand_image")
             or reward_data.brand_image,
+            "status": request_data.get("status", reward_data.status),
         }
 
         serializer = RewardSerializer(

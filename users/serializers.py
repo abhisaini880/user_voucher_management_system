@@ -16,6 +16,7 @@ class UserSerializer(serializers.ModelSerializer):
         instance.current_points = validated_data["current_points"]
         instance.read_only = validated_data["read_only"]
         instance.voucher_write = validated_data["voucher_write"]
+        instance.upi_id = validated_data["upi_id"]
         instance.save()
 
         return instance
@@ -27,6 +28,7 @@ class UserSerializer(serializers.ModelSerializer):
             unique_id=validated_data["unique_id"],
             mobile_number=validated_data["mobile_number"],
             region=validated_data["region"],
+            upi_id=validated_data["upi_id"],
             points_earned=validated_data["points_earned"],
         )
 
@@ -41,6 +43,7 @@ class UserSerializer(serializers.ModelSerializer):
             "mobile_number",
             "unique_id",
             "region",
+            "upi_id",
             "staff",
             "is_active",
             "current_points",

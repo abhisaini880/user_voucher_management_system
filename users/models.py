@@ -68,6 +68,7 @@ class User(AbstractBaseUser):
     ws_name = models.CharField(max_length=100, null=True)
     name = models.CharField(max_length=100, null=True)
     region = models.CharField(max_length=100, null=True)
+    upi_id = models.CharField(max_length=100, null=True)
     points_earned = models.IntegerField(default=0)
     points_redeemed = models.IntegerField(default=0)
     current_points = models.IntegerField(default=0)
