@@ -69,15 +69,23 @@ class WindowViewSet(viewsets.ViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request):
-        end_date = request.data.get("end_date")
-        if RedeemWindow.objects.filter(is_active=True).exists():
+        request_data = request.data
+        end_date = request_data.get("end_date")
+        window_status = request_data.get("status")
+        if RedeemWindow.objects.filter(is_active=True).exists() and (
+            end_date or window_status is not None
+        ):
             window = RedeemWindow.objects.filter(is_active=True).first()
             try:
-                data = {
-                    "close_at": datetime.strptime(
+                data = {}
+                if end_date:
+                    data["close_at"] = datetime.strptime(
                         end_date, "%Y-%m-%d %H:%M:%S"
-                    ),
-                }
+                    )
+
+                if window_status is not None:
+                    data["is_active"] = window_status
+
             except:
                 return Response("Date format should be `YYYY-MM-DD HH:MM:SS`")
             serializer = WindowSerializer(window, data=data, partial=True)

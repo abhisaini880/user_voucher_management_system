@@ -8,6 +8,7 @@ class Reward(models.Model):
     brand_value = models.IntegerField(null=False)
     points_value = models.IntegerField(null=False)
     brand_image = models.URLField(null=False)
+    status = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
