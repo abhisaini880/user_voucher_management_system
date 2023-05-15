@@ -13,6 +13,7 @@ class UserManager(BaseUserManager):
         points_earned=0,
         password=None,
         admin=False,
+        upi_id=None,
     ):
         """
         Creates and saves a User with the given mobile number and password.
@@ -30,6 +31,7 @@ class UserManager(BaseUserManager):
             name=name,
             region=region,
             points_earned=points_earned,
+            upi_id=upi_id,
         )
         if admin:
             user.set_password(password)
