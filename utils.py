@@ -27,6 +27,14 @@ def unique_order_id_generator(instance):
     return new_order_id
 
 
+def unique_product_code_generator(instance):
+    new_product_code = random_string_generator()
+
+    if instance.objects.filter(product_code=new_product_code).exists():
+        return unique_product_code_generator(instance)
+    return new_product_code
+
+
 def convert_image_to_binary(image_path):
     image_path = "." + str(image_path)
     image_data = None

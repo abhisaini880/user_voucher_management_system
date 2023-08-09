@@ -11,6 +11,7 @@ from rest_framework import status
 from rewards.models import Reward
 from .serializers import RewardSerializer
 from users.api import IsAdminView, IsEditor
+import utils
 
 
 User = get_user_model()
@@ -48,12 +49,17 @@ class RewardViewSet(viewsets.ViewSet):
             )
 
         reward_data = {
+            "product_code": utils.unique_product_code_generator(Reward),
             "brand": request_data.get("brand"),
             "brand_heading": request_data.get("brand_heading"),
             "brand_value": request_data.get("brand_value"),
             "points_value": request_data.get("points_value"),
             "brand_image": request_data.get("brand_image"),
         }
+
+        # Add expiry if `Muthoot` brand
+        if reward_data.get("brand", "").lower() == "muthoot":
+            reward_data["expiry"] = 90
 
         serializer = RewardSerializer(data=reward_data)
         if serializer.is_valid():
@@ -145,6 +151,10 @@ class RewardViewSet(viewsets.ViewSet):
         reward_data_list = rewards_df.to_dict("records")
         incorrect_reward_list = []
         for index, data in enumerate(reward_data_list):
+            data["product_code"] = utils.unique_product_code_generator(Reward)
+            # Add expiry if `Muthoot` brand
+            if data.get("brand", "").lower() == "muthoot":
+                data["expiry"] = 90
             serializer = RewardSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()

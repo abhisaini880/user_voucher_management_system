@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from cart.models import Order, Transaction, Points
+from cart.models import Order, Transaction, Points, VoucherAPITokens
 from datetime import datetime
 from users.serializers import UserSerializer
 
@@ -71,4 +71,16 @@ class PointSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Points
+        fields = "__all__"
+
+
+class TokenSerializer(serializers.ModelSerializer):
+    def update(self, instance, validated_data):
+        instance.token = validated_data["token"]
+        instance.save()
+
+        return instance
+
+    class Meta:
+        model = VoucherAPITokens
         fields = "__all__"

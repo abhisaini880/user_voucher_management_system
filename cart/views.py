@@ -2,6 +2,7 @@ import pandas as pd
 from django.core.files.base import ContentFile
 
 from cart.models import Order, Transaction, Points
+from rewards.models import Reward
 from django.contrib.auth import get_user_model
 from rest_framework import viewsets, permissions
 from cart.serializers import (
@@ -15,9 +16,11 @@ from rest_framework.decorators import action
 from rest_framework import status
 import utils
 from users.api import IsAdminView, IsEditor
+from cart.VoucherAPI.muthoot import MuthootAPI
 
 User = get_user_model()
 status_mapping = {"Order Placed": 0, "Delivered": 1, "Reedemed": 3}
+Muthoot_api = MuthootAPI()
 
 
 class OrderViewSet(viewsets.ViewSet):
@@ -105,6 +108,38 @@ class OrderViewSet(viewsets.ViewSet):
             transaction_data["points_reedemed"] = (
                 transaction_data["points_value"] * transaction_data["quantity"]
             )
+
+            # Generate vocher code if branch is Muthoot
+            if transaction_data.get("brand", "").lower() == "muthoot":
+                reward = Reward.objects.get(
+                    product_code=data.get("product_code")
+                )
+
+                if not reward:
+                    return Response(
+                        "Reward doesn't exist !",
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+                voucher_details = [
+                    {
+                        "ProductCode": data.get("product_code"),
+                        "Quantity": data.get("quantity"),
+                        "VoucherAmt": data.get("brand_value"),
+                        "DueDays": reward.expiry if reward.expiry else 90,
+                    }
+                ]
+
+                Muthoot_order_id = (
+                    f"{request_data.get('order_id', 'ORD')}_{index}"
+                )
+                order_value = data.get("brand_value") * data.get("quantity")
+                voucher_codes = Muthoot_api.place_order(
+                    order_id=Muthoot_order_id,
+                    order_value=order_value,
+                    order_details=voucher_details,
+                )
+                transaction_data["voucher_code"] = ",".join(voucher_codes)
 
             transaction_seralizer = TransactionSerializer(
                 data=transaction_data
@@ -335,6 +370,10 @@ class TransactionViewSet(viewsets.ViewSet):
                         {"transaction_id": ["transaction Doesn't exists"]},
                     ]
                 )
+                continue
+
+            # If transcation belongs to Muthoot brand then skip it.
+            if transaction_data.brand.lower() == "muthoot":
                 continue
 
             updated_data = {"voucher_code": data.get("voucher_code")}

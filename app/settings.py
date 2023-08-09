@@ -143,3 +143,13 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# Muthoot API tokens
+MUTHOOT_API_TOKENS = {
+    "identifier": "MUTHOOT_B",
+    "clientcode": "MUTHOOT_B",
+    "username": "",
+    "password": "",
+    "party_code": "CO062",
+}

@@ -62,3 +62,16 @@ class Points(models.Model):
 
     class Meta:
         db_table = "points"
+
+
+class VoucherAPITokens(models.Model):
+    token_id = models.AutoField(primary_key=True)
+    brand = models.CharField(max_length=100, null=False)
+    token = models.CharField(max_length=120, blank=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return f"Token: {self.brand} - {self.token}"
+
+    class Meta:
+        db_table = "voucher_api_tokens"
