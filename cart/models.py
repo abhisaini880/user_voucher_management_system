@@ -35,6 +35,7 @@ class Transaction(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     order_id = models.CharField(max_length=120, blank=True)
     brand = models.CharField(max_length=100, null=False)
+    brand_heading = models.CharField(max_length=255, null=True, blank=True)
     brand_value = models.IntegerField(null=False)
     points_value = models.IntegerField(null=False)
     quantity = models.IntegerField(null=False, default=1)

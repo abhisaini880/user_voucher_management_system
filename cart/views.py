@@ -100,6 +100,7 @@ class OrderViewSet(viewsets.ViewSet):
                 "user_id": request_data.get("user_id"),
                 "order_id": request_data["order_id"],
                 "brand": data.get("brand"),
+                "brand_heading": data.get("brand_heading"),
                 "brand_value": data.get("brand_value"),
                 "points_value": data.get("points_value"),
                 "quantity": data.get("quantity"),
