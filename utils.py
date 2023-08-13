@@ -82,7 +82,13 @@ def generate_message(key, value):
         template_id = "1507164976279565550"
         message = f"Your+OTP+from+Reckitt+Udaan+is+({value})"
 
-    if key == "order":
+    elif key == "order":
         template_id = "1507166625346783704"
         message = f"Hi%2C+Your+order+ID%3A+{value}+has+been+confirmed.+It+will+be+delivered+in+15+days.+For+any+support%2C+reach+out+to+us+at+helpdesk%40reckittudaan.in+or+0120-4602918.+Team+RBUDAAN"
+
+    elif key == "muthoot_order":
+        brand, code = value
+        template_id = "1507166625354719795"
+        message = f"Hi%2C+You+have+received+a+{brand}+GIFT+CODE+-+{code}+from+www.reckittudaan.in.+Note%3A+No+physical+Voucher+would+be+sent.+For+any+support%2C+reach+out+to+us+at+helpdesk%40reckittudaan.in+Team+RBUDAAN&oq=Hi%2C+You+have+received+a+%7B%23var%23%7D+GIFT+CODE+-+%7B%23var%23%7D+from+www.reckittudaan.in.+Note%3A+No+physical+Voucher+would+be+sent.+For+any+support%2C+reach+out+to+us+at+helpdesk%40reckittudaan.in+Team+RBUDAAN"
+
     return message, template_id

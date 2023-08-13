@@ -84,7 +84,6 @@ class UserViewSet(viewsets.ViewSet):
         ],
         "update": [
             permissions.IsAuthenticated,
-            IsEditor,
         ],
         "bulk_create": [
             permissions.IsAuthenticated,
@@ -147,37 +146,80 @@ class UserViewSet(viewsets.ViewSet):
 
         updated_data = {
             "name": request_data.get("name") or user_data.name,
-            "ws_name": request_data.get("ws_name") or user_data.ws_name,
-            "region": request_data.get("region") or user_data.region,
-            "upi_id": request_data.get("upi_id") or user_data.upi_id,
-            "read_only": request_data.get("read_only", user_data.read_only),
-            "voucher_write": request_data.get(
-                "voucher_write", user_data.voucher_write
-            ),
-            "points_earned": user_data.points_earned
-            + request_data.get("add_points", 0),
-            "points_redeemed": user_data.points_redeemed
-            + request_data.get("delete_points", 0),
+            "email_id": request_data.get("email_id") or user_data.email_id,
+            "gender": request_data.get("gender") or user_data.gender,
+            "address": request_data.get("address") or user_data.address,
+            "city": request_data.get("city") or user_data.city,
+            "pincode": request_data.get("pincode") or user_data.pincode,
+            "state": request_data.get("state") or user_data.state,
+            "date_of_birth": request_data.get("date_of_birth")
+            or user_data.date_of_birth,
+            "marital_status": request_data.get("marital_status")
+            or user_data.marital_status,
+            "spouse_name": request_data.get("spouse_name")
+            or user_data.spouse_name,
+            "spouse_date_of_birth": request_data.get("spouse_date_of_birth")
+            or user_data.spouse_date_of_birth,
+            "anniversary_date": request_data.get("anniversary_date")
+            or user_data.anniversary_date,
+            "ws_name": user_data.ws_name,
+            "region": user_data.region,
+            "upi_id": user_data.upi_id,
+            "read_only": user_data.read_only,
+            "voucher_write": user_data.voucher_write,
+            "points_earned": user_data.points_earned,
+            "points_redeemed": user_data.points_redeemed,
+            "upi_verified": user_data.upi_verified or False,
+            "ASM": user_data.ASM,
+            "outlet_type": user_data.outlet_type,
+            "current_points": user_data.current_points,
         }
 
-        updated_data["current_points"] = (
-            updated_data["points_earned"] - updated_data["points_redeemed"]
-        )
-
-        if updated_data["current_points"] < 0:
-            return Response(
-                "Can't update the points value below 0.",
-                status=status.HTTP_400_BAD_REQUEST,
+        if user_data.staff_editor:
+            updated_data.update(
+                {
+                    "ws_name": request_data.get("ws_name")
+                    or user_data.ws_name,
+                    "region": request_data.get("region") or user_data.region,
+                    "upi_id": request_data.get("upi_id") or user_data.upi_id,
+                    "read_only": request_data.get(
+                        "read_only", user_data.read_only
+                    ),
+                    "voucher_write": request_data.get(
+                        "voucher_write", user_data.voucher_write
+                    ),
+                    "points_earned": user_data.points_earned
+                    + request_data.get("add_points", 0),
+                    "points_redeemed": user_data.points_redeemed
+                    + request_data.get("delete_points", 0),
+                    "upi_verified": request_data.get("upi_verified")
+                    or user_data.upi_verified,
+                    "ASM": request_data.get("ASM") or user_data.ASM,
+                    "outlet_type": request_data.get("outlet_type")
+                    or user_data.outlet_type,
+                }
             )
 
-        diff = updated_data["current_points"] - user_data.current_points
+            updated_data["current_points"] = (
+                updated_data["points_earned"] - updated_data["points_redeemed"]
+            )
+
+            if updated_data["current_points"] < 0:
+                return Response(
+                    "Can't update the points value below 0.",
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            diff = updated_data["current_points"] - user_data.current_points
 
         serializer = UserSerializer(user_data, data=updated_data, partial=True)
         if serializer.is_valid():
             serializer.save()
             # Make entry in points table
-            if request_data.get("add_points") or request_data.get(
-                "delete_points"
+            if (
+                user_data.staff_editor
+                and request_data.get("add_points")
+                or request_data.get("delete_points")
             ):
                 points_data = {
                     "user_id": user_data.id,
@@ -363,6 +405,27 @@ class UserViewSet(viewsets.ViewSet):
                 + data.get("add_points", 0),
                 "points_redeemed": user_data.points_redeemed
                 + data.get("delete_points", 0),
+                "email_id": data.get("email_id") or user_data.email_id,
+                "gender": data.get("gender") or user_data.gender,
+                "address": data.get("address") or user_data.address,
+                "city": data.get("city") or user_data.city,
+                "pincode": data.get("pincode") or user_data.pincode,
+                "state": data.get("state") or user_data.state,
+                "date_of_birth": data.get("date_of_birth")
+                or user_data.date_of_birth,
+                "marital_status": data.get("marital_status")
+                or user_data.marital_status,
+                "spouse_name": data.get("spouse_name")
+                or user_data.spouse_name,
+                "spouse_date_of_birth": data.get("spouse_date_of_birth")
+                or user_data.spouse_date_of_birth,
+                "anniversary_date": data.get("anniversary_date")
+                or user_data.anniversary_date,
+                "upi_verified": data.get("upi_verified")
+                or user_data.upi_verified,
+                "ASM": data.get("ASM") or user_data.ASM,
+                "outlet_type": data.get("outlet_type")
+                or user_data.outlet_type,
             }
 
             updated_data["current_points"] = (

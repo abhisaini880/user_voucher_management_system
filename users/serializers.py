@@ -17,6 +17,23 @@ class UserSerializer(serializers.ModelSerializer):
         instance.read_only = validated_data["read_only"]
         instance.voucher_write = validated_data["voucher_write"]
         instance.upi_id = validated_data.get("upi_id")
+        instance.upi_verified = validated_data.get("upi_verified")
+        instance.email_id = validated_data.get("email_id")
+        instance.address = validated_data.get("address")
+        instance.state = validated_data.get("state")
+        instance.city = validated_data.get("city")
+        instance.pincode = validated_data.get("pincode")
+        instance.gender = validated_data.get("gender")
+        instance.date_of_birth = validated_data.get("date_of_birth")
+        instance.marital_status = validated_data.get("marital_status")
+        instance.spouse_name = validated_data.get("spouse_name")
+        instance.spouse_date_of_birth = validated_data.get(
+            "spouse_date_of_birth"
+        )
+        instance.anniversary_date = validated_data.get("anniversary_date")
+        instance.outlet_type = validated_data.get("outlet_type")
+        instance.ASM = validated_data.get("ASM")
+
         instance.save()
 
         return instance
@@ -53,6 +70,21 @@ class UserSerializer(serializers.ModelSerializer):
             "staff_editor",
             "read_only",
             "voucher_write",
+            "upi_verified",
+            "email_id",
+            "gender",
+            "address",
+            "city",
+            "pincode",
+            "state",
+            "date_of_birth",
+            "marital_status",
+            "spouse_name",
+            "spouse_date_of_birth",
+            "anniversary_date",
+            "upi_verified",
+            "outlet_type",
+            "ASM",
         )
         extra_kwargs = {
             "otp": {"write_only": True},
