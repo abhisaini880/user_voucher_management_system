@@ -65,6 +65,22 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser):
+
+    GENDER = (
+        ("Male", "Male"),
+        ("Female", "Female"),
+        ("Other", "Other"),
+    )
+
+    MARITAL_STATUS = (
+        ("Single", "Single"),
+        ("Married", "Married"),
+        ("Divorced", "Divorced"),
+        ("Widowed", "Widowed"),
+    )
+
+    OUTLET = (("Pharmacy", "Pharmacy"), ("Grocery", "Grocery"))
+
     mobile_number = models.BigIntegerField(unique=True)
     unique_id = models.CharField(max_length=100, unique=True, null=True)
     ws_name = models.CharField(max_length=100, null=True)
@@ -84,6 +100,22 @@ class User(AbstractBaseUser):
         default=False
     )  # a admin user; non super-user with write access
     admin = models.BooleanField(default=False)  # a superuser
+    email_id = models.EmailField(null=True)
+    gender = models.CharField(choices=GENDER, null=True, max_length=10)
+    address = models.TextField(null=True)
+    city = models.CharField(max_length=20, null=True)
+    pincode = models.IntegerField(null=True)
+    state = models.CharField(max_length=20, null=True)
+    date_of_birth = models.DateField(null=True)
+    marital_status = models.CharField(
+        choices=MARITAL_STATUS, null=True, max_length=10
+    )
+    spouse_name = models.CharField(max_length=50, null=True)
+    spouse_date_of_birth = models.DateField(null=True)
+    anniversary_date = models.DateField(null=True)
+    upi_verified = models.BooleanField(default=False)
+    outlet_type = models.CharField(choices=OUTLET, null=True, max_length=10)
+    ASM = models.CharField(max_length=20, null=True)
 
     USERNAME_FIELD = "mobile_number"
     REQUIRED_FIELDS = [

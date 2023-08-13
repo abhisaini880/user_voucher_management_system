@@ -142,6 +142,21 @@ class OrderViewSet(viewsets.ViewSet):
                 )
                 transaction_data["voucher_code"] = ",".join(voucher_codes)
 
+                # Send sms to customer
+                for code in voucher_codes:
+                    message, template_id = utils.generate_message(
+                        "muthoot_order",
+                        (
+                            data.get("brand_heading"),
+                            code,
+                        ),
+                    )
+                    utils.send_sms(
+                        mobile=user.mobile_number,
+                        message=message,
+                        template_id=template_id,
+                    )
+
             transaction_seralizer = TransactionSerializer(
                 data=transaction_data
             )
