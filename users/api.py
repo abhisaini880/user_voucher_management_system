@@ -216,9 +216,8 @@ class UserViewSet(viewsets.ViewSet):
         if serializer.is_valid():
             serializer.save()
             # Make entry in points table
-            if (
-                user_data.staff_editor
-                and request_data.get("add_points")
+            if user_data.staff_editor and (
+                request_data.get("add_points")
                 or request_data.get("delete_points")
             ):
                 points_data = {
