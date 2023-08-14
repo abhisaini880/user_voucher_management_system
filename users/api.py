@@ -420,8 +420,9 @@ class UserViewSet(viewsets.ViewSet):
                 or user_data.spouse_date_of_birth,
                 "anniversary_date": data.get("anniversary_date")
                 or user_data.anniversary_date,
-                "upi_verified": data.get("upi_verified")
-                or user_data.upi_verified,
+                "upi_verified": data.get(
+                    "upi_verified", user_data.upi_verified
+                ),
                 "ASM": data.get("ASM") or user_data.ASM,
                 "outlet_type": data.get("outlet_type")
                 or user_data.outlet_type,
