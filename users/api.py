@@ -175,7 +175,7 @@ class UserViewSet(viewsets.ViewSet):
             "current_points": user_data.current_points,
         }
 
-        if user_data.staff_editor:
+        if request.user.staff_editor:
             updated_data.update(
                 {
                     "ws_name": request_data.get("ws_name")
@@ -216,7 +216,7 @@ class UserViewSet(viewsets.ViewSet):
         if serializer.is_valid():
             serializer.save()
             # Make entry in points table
-            if user_data.staff_editor and (
+            if request.user.staff_editor and (
                 request_data.get("add_points")
                 or request_data.get("delete_points")
             ):
