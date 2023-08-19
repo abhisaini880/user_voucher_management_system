@@ -169,11 +169,18 @@ class UserViewSet(viewsets.ViewSet):
             "voucher_write": user_data.voucher_write,
             "points_earned": user_data.points_earned,
             "points_redeemed": user_data.points_redeemed,
-            "upi_verified": user_data.upi_verified or False,
             "ASM": user_data.ASM,
             "outlet_type": user_data.outlet_type,
             "current_points": user_data.current_points,
+            "upi_id": request_data.get("upi_id") or user_data.upi_id,
+            "upi_verified": user_data.upi_verified or False,
         }
+
+        # change upi verified to false if upi id is changed
+        if request_data.get("upi_id") and (
+            request_data.get("upi_id") != user_data.upi_id
+        ):
+            updated_data["upi_verified"] = False
 
         if request.user.staff_editor:
             updated_data.update(
@@ -181,7 +188,6 @@ class UserViewSet(viewsets.ViewSet):
                     "ws_name": request_data.get("ws_name")
                     or user_data.ws_name,
                     "region": request_data.get("region") or user_data.region,
-                    "upi_id": request_data.get("upi_id") or user_data.upi_id,
                     "read_only": request_data.get(
                         "read_only", user_data.read_only
                     ),
@@ -192,13 +198,14 @@ class UserViewSet(viewsets.ViewSet):
                     + request_data.get("add_points", 0),
                     "points_redeemed": user_data.points_redeemed
                     + request_data.get("delete_points", 0),
-                    "upi_verified": request_data.get("upi_verified")
-                    or user_data.upi_verified,
                     "ASM": request_data.get("ASM") or user_data.ASM,
                     "outlet_type": request_data.get("outlet_type")
                     or user_data.outlet_type,
                 }
             )
+
+            if request_data.get("upi_verified") == True:
+                updated_data["upi_verified"] = True
 
             updated_data["current_points"] = (
                 updated_data["points_earned"] - updated_data["points_redeemed"]
