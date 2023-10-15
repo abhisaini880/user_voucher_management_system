@@ -9,12 +9,14 @@ from rest_framework.decorators import action
 from rest_framework import status
 
 from rewards.models import Reward
+from cart.VoucherAPI.advantage import AdvantageAPI
 from .serializers import RewardSerializer
 from users.api import IsAdminView, IsEditor
 import utils
 
 
 User = get_user_model()
+Advantage_api = AdvantageAPI()
 
 
 class RewardViewSet(viewsets.ViewSet):
@@ -38,7 +40,18 @@ class RewardViewSet(viewsets.ViewSet):
         else:
             queryset = Reward.objects.all()
         serializer = RewardSerializer(queryset, many=True)
-        return Response(serializer.data)
+
+        reward_data_list = [dict(entry) for entry in serializer.data]
+        rewards = {
+            "rewards": reward_data_list,
+        }
+
+        custom_rewards = Advantage_api.list_catalog()
+
+        if not Advantage_api.error:
+            rewards["custom_rewards"] = custom_rewards
+
+        return Response(rewards)
 
     def create(self, request):
         request_data = request.data
