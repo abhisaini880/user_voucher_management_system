@@ -17,10 +17,12 @@ from rest_framework import status
 import utils
 from users.api import IsAdminView, IsEditor
 from cart.VoucherAPI.muthoot import MuthootAPI
+from cart.VoucherAPI.advantage import AdvantageAPI
 
 User = get_user_model()
 status_mapping = {"Order Placed": 0, "Delivered": 1, "Reedemed": 3}
 Muthoot_api = MuthootAPI()
+Advantage_api = AdvantageAPI()
 
 
 class OrderViewSet(viewsets.ViewSet):
@@ -156,6 +158,47 @@ class OrderViewSet(viewsets.ViewSet):
                         message=message,
                         template_id=template_id,
                     )
+
+            else:
+                Advantage_order_id = (
+                    f"{request_data.get('order_id', 'ORD')}_{index}"
+                )
+
+                voucher_details = {
+                    "upc_id": data.get("product_code"),
+                    "quantity": data.get("quantity"),
+                    "user_contact": user.mobile_number,
+                    "user_email": user.email_id,
+                }
+
+                voucher_codes = Advantage_api.place_order(
+                    order_id=Advantage_order_id,
+                    order_details=voucher_details,
+                )
+
+                # voucher_codes : [(code, pin)]
+                codes = []
+                for code in voucher_codes:
+                    temp_code = code[0]
+                    if code[1]:
+                        temp_code += f"|{code[1]}"
+                    codes.append(temp_code)
+
+                transaction_data["voucher_code"] = ",".join(codes)
+
+                # for code in voucher_codes:
+                #     message, template_id = utils.generate_message(
+                #         "muthoot_order",
+                #         (
+                #             data.get("brand_heading"),
+                #             code,
+                #         ),
+                #     )
+                #     utils.send_sms(
+                #         mobile=user.mobile_number,
+                #         message=message,
+                #         template_id=template_id,
+                #     )
 
             transaction_seralizer = TransactionSerializer(
                 data=transaction_data
