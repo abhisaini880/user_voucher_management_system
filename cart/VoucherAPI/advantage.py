@@ -35,6 +35,24 @@ class AdvantageAPI:
             }
 
             response = requests.post(url=url, params=params)
+
+            if response.status_code == 400:
+                response = response.json()
+                if response.get("error") == "invalid_grant":
+                    auth_url = "https://secure.workadvantage.in/fetch_authorization_code"
+                    auth_params = {
+                        "client_id": self.client_id,
+                        "client_secret": self.client_secret,
+                        "redirect_uri": self.redirect_uri,
+                    }
+                    auth_response = requests.post(
+                        url=auth_url, params=auth_params
+                    )
+                    if auth_response.status_code == 200:
+                        auth_response = auth_response.json()
+                        params["code"] = auth_response.get("code")
+                        response = requests.post(url=url, params=params)
+
             if response.status_code == 200:
                 response = response.json()
                 self.auth_token = response.get("access_token")
@@ -67,8 +85,7 @@ class AdvantageAPI:
             response = requests.get(url=url, headers=headers, params=params)
             if response.status_code == 401 or (
                 response.status_code == 200
-                and response.json().get("info")
-                == "You don't have access to this api"
+                and response.json().get("success") == False
             ):
                 # Auth token is expired, regenerate it
                 self.generate_auth_token()
