@@ -54,7 +54,6 @@ def generate_otp():
 
 
 def send_sms(mobile, message, template_id):
-
     if not (mobile and message and template_id):
         return None
     url = (
@@ -89,6 +88,6 @@ def generate_message(key, value):
     elif key == "muthoot_order":
         brand, code = value
         template_id = "1507166625354719795"
-        message = f"Hi%2C+You+have+received+a+{brand}+GIFT+CODE+-+{code}+from+www.reckittudaan.in.+Note%3A+No+physical+Voucher+would+be+sent.+For+any+support%2C+reach+out+to+us+at+helpdesk%40reckittudaan.in+Team+RBUDAAN&oq=Hi%2C+You+have+received+a+%7B%23var%23%7D+GIFT+CODE+-+%7B%23var%23%7D+from+www.reckittudaan.in.+Note%3A+No+physical+Voucher+would+be+sent.+For+any+support%2C+reach+out+to+us+at+helpdesk%40reckittudaan.in+Team+RBUDAAN"
+        message = f"Hi%2C+You+have+received+a+{brand}+GIFT+CODE+-+{code}+from+www.reckittudaan.in.+Note%3A+No+physical+Voucher+would+be+sent.+For+any+support%2C+reach+out+to+us+at+helpdesk%40reckittudaan.in+Team+RBUDAAN"
 
     return message, template_id
