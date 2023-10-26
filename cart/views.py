@@ -40,9 +40,7 @@ class OrderViewSet(viewsets.ViewSet):
 
     def get_permissions(self):
         try:
-            return [
-                permission() for permission in self.permission_map[self.action]
-            ]
+            return [permission() for permission in self.permission_map[self.action]]
         except KeyError:
             return [permission() for permission in self.permission_classes]
 
@@ -83,9 +81,7 @@ class OrderViewSet(viewsets.ViewSet):
 
         order_serializer = OrderSerializer(data=request_data)
         if not order_serializer.is_valid():
-            return Response(
-                order_serializer.errors, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response(order_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         # check if user has enough points
         if user.current_points < request_data.get("total_points_value"):
@@ -114,9 +110,7 @@ class OrderViewSet(viewsets.ViewSet):
 
             # Generate vocher code if branch is Muthoot
             if transaction_data.get("brand", "").lower() == "muthoot":
-                reward = Reward.objects.get(
-                    product_code=data.get("product_code")
-                )
+                reward = Reward.objects.get(product_code=data.get("product_code"))
 
                 if not reward:
                     return Response(
@@ -133,9 +127,7 @@ class OrderViewSet(viewsets.ViewSet):
                     }
                 ]
 
-                Muthoot_order_id = (
-                    f"{request_data.get('order_id', 'ORD')}_{index}"
-                )
+                Muthoot_order_id = f"{request_data.get('order_id', 'ORD')}_{index}"
                 order_value = data.get("brand_value") * data.get("quantity")
                 voucher_codes = Muthoot_api.place_order(
                     order_id=Muthoot_order_id,
@@ -160,9 +152,7 @@ class OrderViewSet(viewsets.ViewSet):
                     )
 
             else:
-                Advantage_order_id = (
-                    f"{request_data.get('order_id', 'ORD')}_{index}"
-                )
+                Advantage_order_id = f"{request_data.get('order_id', 'ORD')}_{index}"
 
                 voucher_details = {
                     "upc_id": data.get("product_code"),
@@ -181,32 +171,28 @@ class OrderViewSet(viewsets.ViewSet):
                 for code in voucher_codes:
                     temp_code = code[0]
                     if code[1]:
-                        temp_code += f"|{code[1]}"
+                        temp_code += f"({code[1]})"
                     codes.append(temp_code)
 
                 transaction_data["voucher_code"] = ",".join(codes)
 
-                # for code in voucher_codes:
-                #     message, template_id = utils.generate_message(
-                #         "muthoot_order",
-                #         (
-                #             data.get("brand_heading"),
-                #             code,
-                #         ),
-                #     )
-                #     utils.send_sms(
-                #         mobile=user.mobile_number,
-                #         message=message,
-                #         template_id=template_id,
-                #     )
+                for code in voucher_codes:
+                    message, template_id = utils.generate_message(
+                        "muthoot_order",
+                        (
+                            data.get("brand_heading"),
+                            code,
+                        ),
+                    )
+                    utils.send_sms(
+                        mobile=user.mobile_number,
+                        message=message,
+                        template_id=template_id,
+                    )
 
-            transaction_seralizer = TransactionSerializer(
-                data=transaction_data
-            )
+            transaction_seralizer = TransactionSerializer(data=transaction_data)
             if not transaction_seralizer.is_valid():
-                incorrect_transaction_list.append(
-                    [index, transaction_seralizer.errors]
-                )
+                incorrect_transaction_list.append([index, transaction_seralizer.errors])
                 continue
 
             transaction_seralizer.save()
@@ -233,9 +219,7 @@ class OrderViewSet(viewsets.ViewSet):
                 incorrect_transaction_list, status=status.HTTP_400_BAD_REQUEST
             )
 
-        message, template_id = utils.generate_message(
-            "order", request_data["order_id"]
-        )
+        message, template_id = utils.generate_message("order", request_data["order_id"])
         utils.send_sms(
             mobile=user.mobile_number, message=message, template_id=template_id
         )
@@ -267,14 +251,10 @@ class OrderViewSet(viewsets.ViewSet):
             )
 
         updated_data = {
-            "status": status_mapping[
-                request_data.get("status", "Order Placed")
-            ],
+            "status": status_mapping[request_data.get("status", "Order Placed")],
             "message": request_data["message"],
         }
-        serializer = OrderSerializer(
-            Order_data, data=updated_data, partial=True
-        )
+        serializer = OrderSerializer(Order_data, data=updated_data, partial=True)
         if serializer.is_valid():
             serializer.save()
 
@@ -323,7 +303,6 @@ class OrderViewSet(viewsets.ViewSet):
         order_data_list = order_df.to_dict("records")
         incorrect_order_list = []
         for index, data in enumerate(order_data_list):
-
             try:
                 order_data = Order.objects.get(order_id=data["order_id"])
             except:
@@ -337,9 +316,7 @@ class OrderViewSet(viewsets.ViewSet):
 
             updated_data = {"status": data.get("status")}
 
-            serializer = OrderSerializer(
-                order_data, data=updated_data, partial=True
-            )
+            serializer = OrderSerializer(order_data, data=updated_data, partial=True)
             if serializer.is_valid():
                 serializer.save()
             else:
@@ -347,9 +324,7 @@ class OrderViewSet(viewsets.ViewSet):
 
         if incorrect_order_list:
             return Response({"success": False, "data": incorrect_order_list})
-        return Response(
-            {"success": True, "message": "Successfully updated orders !"}
-        )
+        return Response({"success": True, "message": "Successfully updated orders !"})
 
 
 class TransactionViewSet(viewsets.ViewSet):
@@ -364,9 +339,7 @@ class TransactionViewSet(viewsets.ViewSet):
 
     def get_permissions(self):
         try:
-            return [
-                permission() for permission in self.permission_map[self.action]
-            ]
+            return [permission() for permission in self.permission_map[self.action]]
         except KeyError:
             return [permission() for permission in self.permission_classes]
 
@@ -406,9 +379,7 @@ class TransactionViewSet(viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if not all(
-            header in voucher_df.columns for header in required_headers
-        ):
+        if not all(header in voucher_df.columns for header in required_headers):
             return Response(
                 "File Missing Required Fields !",
                 status=status.HTTP_400_BAD_REQUEST,
@@ -417,7 +388,6 @@ class TransactionViewSet(viewsets.ViewSet):
         voucher_data_list = voucher_df.to_dict("records")
         incorrect_transaction_list = []
         for index, data in enumerate(voucher_data_list):
-
             try:
                 transaction_data = Transaction.objects.get(
                     transaction_id=data["transaction_id"]
@@ -443,17 +413,11 @@ class TransactionViewSet(viewsets.ViewSet):
             if serializer.is_valid():
                 serializer.save()
             else:
-                incorrect_transaction_list.append(
-                    {index + 2: serializer.errors}
-                )
+                incorrect_transaction_list.append({index + 2: serializer.errors})
 
         if incorrect_transaction_list:
-            return Response(
-                {"success": False, "data": incorrect_transaction_list}
-            )
-        return Response(
-            {"success": True, "message": "Successfully updated vouchers !"}
-        )
+            return Response({"success": False, "data": incorrect_transaction_list})
+        return Response({"success": True, "message": "Successfully updated vouchers !"})
 
 
 class PointViewSet(viewsets.ViewSet):
@@ -467,9 +431,7 @@ class PointViewSet(viewsets.ViewSet):
 
     def get_permissions(self):
         try:
-            return [
-                permission() for permission in self.permission_map[self.action]
-            ]
+            return [permission() for permission in self.permission_map[self.action]]
         except KeyError:
             return [permission() for permission in self.permission_classes]
 
