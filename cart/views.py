@@ -176,7 +176,7 @@ class OrderViewSet(viewsets.ViewSet):
 
                 transaction_data["voucher_code"] = ",".join(codes)
 
-                for code in voucher_codes:
+                for code in codes:
                     message, template_id = utils.generate_message(
                         "muthoot_order",
                         (
