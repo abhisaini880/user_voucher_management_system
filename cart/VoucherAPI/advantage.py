@@ -39,15 +39,15 @@ class AdvantageAPI:
             if response.status_code == 400:
                 response = response.json()
                 if response.get("error") == "invalid_grant":
-                    auth_url = "https://secure.workadvantage.in/fetch_authorization_code"
+                    auth_url = (
+                        "https://secure.workadvantage.in/fetch_authorization_code"
+                    )
                     auth_params = {
                         "client_id": self.client_id,
                         "client_secret": self.client_secret,
                         "redirect_uri": self.redirect_uri,
                     }
-                    auth_response = requests.post(
-                        url=auth_url, params=auth_params
-                    )
+                    auth_response = requests.get(url=auth_url, params=auth_params)
                     if auth_response.status_code == 200:
                         auth_response = auth_response.json()
                         params["code"] = auth_response.get("code")
@@ -84,15 +84,12 @@ class AdvantageAPI:
 
             response = requests.get(url=url, headers=headers, params=params)
             if response.status_code == 401 or (
-                response.status_code == 200
-                and response.json().get("success") == False
+                response.status_code == 200 and response.json().get("success") == False
             ):
                 # Auth token is expired, regenerate it
                 self.generate_auth_token()
                 headers["Authorization"] = self.auth_token
-                response = requests.get(
-                    url=url, headers=headers, params=params
-                )
+                response = requests.get(url=url, headers=headers, params=params)
 
             if response.status_code == 200:
                 response = response.json()
@@ -118,9 +115,9 @@ class AdvantageAPI:
                 self.error = f"Received status code - {response.status_code}"
 
         except Exception as error:
-            print(f"Error in generating Advantage API Token")
+            print(f"Error in listing catalog products from Advantage")
             print(str(error))
-            self.error = "Error in generating Advantage API Token"
+            self.error = "Error in listing catalog products from Advantage"
             return voucher_list
 
     def place_order(self, order_id: str, order_details: dict):
@@ -133,7 +130,6 @@ class AdvantageAPI:
         """
         voucher_list = []
         try:
-
             url = "https://secure.workadvantage.in/external_order_place"
 
             headers = {"Authorization": self.auth_token}
@@ -159,9 +155,7 @@ class AdvantageAPI:
                 # Auth token is expired, regenerate it
                 self.generate_auth_token()
                 headers["Authorization"] = self.auth_token
-                response = requests.get(
-                    url=url, headers=headers, params=params
-                )
+                response = requests.get(url=url, headers=headers, params=params)
 
             if response.status_code == 200:
                 response = response.json()
@@ -191,7 +185,7 @@ class AdvantageAPI:
             return voucher_list
 
         except Exception as error:
-            print(f"Error in generating Advantage API Token")
+            print(f"Error in placing order on advantage")
             print(str(error))
-            self.error = "Error in generating Advantage API Token"
+            self.error = "Error in placing order on advantage"
             return voucher_list
