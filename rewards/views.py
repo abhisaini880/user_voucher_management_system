@@ -36,9 +36,9 @@ class RewardViewSet(viewsets.ViewSet):
         request_data = request.GET
 
         if request_data.get("status", "").lower() == "true":
-            queryset = Reward.objects.filter(status=True).filter(brand="Muthoot")
+            queryset = Reward.objects.filter(status=True)
         else:
-            queryset = Reward.objects.filter(brand="Muthoot")
+            queryset = Reward.objects.all()
         serializer = RewardSerializer(queryset, many=True)
 
         reward_data_list = [dict(entry) for entry in serializer.data]

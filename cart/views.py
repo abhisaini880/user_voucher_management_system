@@ -151,7 +151,7 @@ class OrderViewSet(viewsets.ViewSet):
                         template_id=template_id,
                     )
 
-            else:
+            elif data.get("custom") == True:
                 Advantage_order_id = f"{request_data.get('order_id', 'ORD')}_{index}"
 
                 voucher_details = {
