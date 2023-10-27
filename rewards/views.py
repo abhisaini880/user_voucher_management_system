@@ -36,9 +36,9 @@ class RewardViewSet(viewsets.ViewSet):
         request_data = request.GET
 
         if request_data.get("status", "").lower() == "true":
-            queryset = Reward.objects.filter(status=True)
+            queryset = Reward.objects.filter(status=True).filter(brand="Muthoot")
         else:
-            queryset = Reward.objects.all()
+            queryset = Reward.objects.filter(brand="Muthoot")
         serializer = RewardSerializer(queryset, many=True)
 
         reward_data_list = [dict(entry) for entry in serializer.data]
@@ -57,9 +57,7 @@ class RewardViewSet(viewsets.ViewSet):
         request_data = request.data
 
         if not request_data:
-            return Response(
-                "Invalid Request !", status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response("Invalid Request !", status=status.HTTP_400_BAD_REQUEST)
 
         reward_data = {
             "product_code": utils.unique_product_code_generator(Reward),
@@ -91,20 +89,16 @@ class RewardViewSet(viewsets.ViewSet):
             )
         updated_data = {
             "brand": request_data.get("brand") or reward_data.brand,
-            "brand_value": request_data.get("brand_value")
-            or reward_data.brand_value,
+            "brand_value": request_data.get("brand_value") or reward_data.brand_value,
             "brand_heading": request_data.get("brand_heading")
             or reward_data.brand_heading,
             "points_value": request_data.get("points_value")
             or reward_data.points_value,
-            "brand_image": request_data.get("brand_image")
-            or reward_data.brand_image,
+            "brand_image": request_data.get("brand_image") or reward_data.brand_image,
             "status": request_data.get("status", reward_data.status),
         }
 
-        serializer = RewardSerializer(
-            reward_data, data=updated_data, partial=True
-        )
+        serializer = RewardSerializer(reward_data, data=updated_data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
@@ -153,9 +147,7 @@ class RewardViewSet(viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if not all(
-            header in rewards_df.columns for header in required_headers
-        ):
+        if not all(header in rewards_df.columns for header in required_headers):
             return Response(
                 "File Missing Required Fields !",
                 status=status.HTTP_400_BAD_REQUEST,
@@ -257,8 +249,6 @@ class RewardViewSet(viewsets.ViewSet):
 
     def get_permissions(self):
         try:
-            return [
-                permission() for permission in self.permission_map[self.action]
-            ]
+            return [permission() for permission in self.permission_map[self.action]]
         except KeyError:
             return [permission() for permission in self.permission_classes]
