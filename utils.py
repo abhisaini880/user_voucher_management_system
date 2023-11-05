@@ -3,6 +3,7 @@ import string
 import base64
 import math
 import requests
+from urllib.parse import quote
 
 api_key = "J2uHCbY3zqnsfo0X"
 api_pass = "5jaQBxbotJ"
@@ -88,6 +89,6 @@ def generate_message(key, value):
     elif key == "muthoot_order":
         brand, code = value
         template_id = "1507166625354719795"
-        message = f"Hi%2C+You+have+received+a+{brand}+GIFT+CODE+-+{code}+from+www.reckittudaan.in.+Note%3A+No+physical+Voucher+would+be+sent.+For+any+support%2C+reach+out+to+us+at+helpdesk%40reckittudaan.in+Team+RBUDAAN"
+        message = f"Hi%2C+You+have+received+a+{quote(brand)}+GIFT+CODE+-+{code}+from+www.reckittudaan.in.+Note%3A+No+physical+Voucher+would+be+sent.+For+any+support%2C+reach+out+to+us+at+helpdesk%40reckittudaan.in+Team+RBUDAAN"
 
     return message, template_id
